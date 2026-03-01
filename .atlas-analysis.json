@@ -1,0 +1,128 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "Gooey Toast",
+  "projectDescription": "A gooey expandable toast notification component for Laravel with advanced features like progress toasts, action buttons, and animations.",
+  "theme": "willow",
+  "primaryColor": "#22c55e",
+  "lightColor": "#3b82f6",
+  "darkColor": "#ef4444",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "core/toast-types",
+              "core/configuration",
+              "core/theming"
+            ]
+          },
+          {
+            "group": "Usage",
+            "pages": [
+              "usage/javascript-api",
+              "usage/livewire",
+              "usage/php-api"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/progress-toasts",
+              "features/undo-toasts",
+              "features/action-buttons",
+              "features/promise-toasts",
+              "features/persistent-toasts",
+              "features/custom-colors",
+              "features/avatars",
+              "features/vibration"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/updating-toasts",
+              "advanced/custom-icons",
+              "advanced/publishing-views"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "PHP API",
+            "pages": [
+              "api/toast-facade",
+              "api/toast-builder"
+            ]
+          },
+          {
+            "group": "JavaScript API",
+            "pages": [
+              "api/toast-methods",
+              "api/configuration-options",
+              "api/events"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Gooey SVG blob animation with expandable details",
+    "Five toast types with unique entrance animations",
+    "Progress toasts with real-time updates",
+    "Undo toasts with countdown timer",
+    "Action buttons with icons and confirmation",
+    "Promise-based API for async operations",
+    "PHP facade and fluent builder API",
+    "Livewire event integration",
+    "User avatars and custom colors",
+    "Dark/light theme support",
+    "Mobile vibration API",
+    "Persistent toasts",
+    "Zero external CSS dependencies"
+  ],
+  "publicApiSurface": [
+    "GooeyToast::make(title, type)",
+    "GooeyToast::success(title, message)",
+    "GooeyToast::error(title, message)",
+    "GooeyToast::warning(title, message)",
+    "GooeyToast::info(title, message)",
+    "ToastBuilder::title(title)",
+    "ToastBuilder::type(type)",
+    "ToastBuilder::message(message)",
+    "ToastBuilder::details(array)",
+    "ToastBuilder::detail(label, value)",
+    "ToastBuilder::footer(text)",
+    "ToastBuilder::actions(array)",
+    "ToastBuilder::action(label, event, icon, color, confirm)",
+    "ToastBuilder::vibrate(pattern)",
+    "ToastBuilder::duration(ms)",
+    "ToastBuilder::persistent()",
+    "ToastBuilder::color(color)",
+    "ToastBuilder::avatar(url)",
+    "ToastBuilder::avatarSize(size)",
+    "ToastBuilder::id(id)",
+    "ToastBuilder::send()",
+    "toast(options)",
+    "toast.progress(title, options)",
+    "toast.undo(title, event, options)",
+    "toast.promise(promise, messages)",
+    "toast.update(id, options)",
+    "toast.theme(theme)",
+    "toast.registerIcon(name, svg)"
+  ]
+}
