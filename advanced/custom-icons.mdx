@@ -1,0 +1,283 @@
+---
+title: Custom icons
+description: Register and use custom SVG icons in your toasts for action buttons and type indicators
+---
+
+Gooey Toast comes with a set of built-in icons, but you can register your own custom SVG icons to match your brand or add functionality beyond what's included.
+
+## Built-in icons
+
+These icons are available out of the box for action buttons:
+
+<CardGroup cols={3}>
+<Card title="external-link" icon="arrow-up-right-from-square">Open in new window</Card>
+<Card title="eye" icon="eye">View or preview</Card>
+<Card title="undo" icon="rotate-left">Undo action</Card>
+<Card title="retry" icon="arrows-rotate">Retry operation</Card>
+<Card title="reply" icon="reply">Reply to message</Card>
+<Card title="map-pin" icon="location-dot">Location or place</Card>
+<Card title="download" icon="download">Download file</Card>
+<Card title="copy" icon="copy">Copy to clipboard</Card>
+<Card title="trash" icon="trash">Delete item</Card>
+<Card title="check" icon="check">Confirm action</Card>
+<Card title="x" icon="xmark">Cancel or close</Card>
+<Card title="image" icon="image">Image or photo</Card>
+</CardGroup>
+
+## Registering custom icons
+
+Use `toast.registerIcon()` to add your own SVG icons. The icon will be available for use in action buttons and as custom type icons.
+
+```js
+// Register a custom star icon
+toast.registerIcon('star', `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+`);
+```
+
+<Note>
+Make sure your SVG uses `currentColor` for the stroke or fill so it inherits the toast's color scheme. Avoid hardcoding colors unless you have a specific design reason.
+</Note>
+
+## Using custom icons in action buttons
+
+Once registered, reference your custom icon by name in action buttons.
+
+```js
+toast({
+    type: 'success',
+    title: 'Item added to favorites',
+    actions: [
+        {
+            label: 'View favorites',
+            icon: 'star',
+            event: 'view-favorites'
+        }
+    ]
+});
+```
+
+## Using custom icons as type icons
+
+You can override the default type icon with your custom icon.
+
+```js
+// Register a custom notification bell icon
+toast.registerIcon('bell', `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+`);
+
+// Use it in a toast
+toast({
+    type: 'info',
+    title: 'New notification',
+    icon: 'bell'
+});
+```
+
+## Complete examples
+
+### Brand icon for premium features
+
+```js
+// Register a crown icon for VIP features
+toast.registerIcon('crown', `
+    <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3 6 6-2-4 8 2 6H5l2-6-4-8 6 2z" />
+    </svg>
+`);
+
+// Show VIP upgrade notification
+toast({
+    type: 'success',
+    title: 'VIP Access Granted',
+    icon: 'crown',
+    color: '#8b5cf6',
+    message: 'Welcome to premium features!',
+    actions: [
+        {
+            label: 'Explore',
+            icon: 'external-link',
+            event: 'explore-vip',
+            color: '#8b5cf6'
+        }
+    ]
+});
+```
+
+### Custom share icon
+
+```js
+// Register a share icon
+toast.registerIcon('share', `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+`);
+
+// Use in social sharing toast
+toast({
+    type: 'success',
+    title: 'Ready to share',
+    actions: [
+        {
+            label: 'Share',
+            icon: 'share',
+            event: 'share-content'
+        },
+        {
+            label: 'Copy link',
+            icon: 'copy',
+            event: 'copy-link'
+        }
+    ]
+});
+```
+
+### Shopping cart icon
+
+```js
+// Register a shopping cart icon
+toast.registerIcon('cart', `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+`);
+
+// Use in e-commerce notifications
+toast({
+    type: 'success',
+    title: 'Added to cart',
+    icon: 'cart',
+    message: 'Nike Air Max 90 - Size 10',
+    actions: [
+        {
+            label: 'View cart',
+            icon: 'cart',
+            event: 'view-cart',
+            color: '#22c55e'
+        },
+        {
+            label: 'Checkout',
+            icon: 'check',
+            event: 'checkout',
+            color: '#3b82f6'
+        }
+    ]
+});
+```
+
+## SVG requirements
+
+<Steps>
+
+<Step title="Use a proper viewBox">
+Always include a `viewBox` attribute so the icon scales properly:
+
+```svg
+<svg viewBox="0 0 24 24">
+```
+</Step>
+
+<Step title="Use currentColor">
+Set `stroke="currentColor"` or `fill="currentColor"` to inherit the toast's theme colors:
+
+```svg
+<svg fill="none" stroke="currentColor">
+```
+</Step>
+
+<Step title="Keep it simple">
+Icons should be simple and recognizable at small sizes. Avoid complex gradients or fine details.
+</Step>
+
+<Step title="Test in both themes">
+Preview your custom icons in both light and dark themes to ensure they're visible and clear.
+</Step>
+
+</Steps>
+
+## Icon sources
+
+Popular sources for SVG icons that work well with Gooey Toast:
+
+<CardGroup cols={2}>
+
+<Card title="Lucide" icon="feather" href="https://lucide.dev">
+Clean, consistent icon set with great documentation. All icons use stroke-based design.
+</Card>
+
+<Card title="Heroicons" icon="sparkles" href="https://heroicons.com">
+Tailwind's official icon library. Available in outline and solid variants.
+</Card>
+
+<Card title="Feather Icons" icon="feather-pointed" href="https://feathericons.com">
+Minimalist icons with a 24x24 grid. Lightweight and easy to customize.
+</Card>
+
+<Card title="Bootstrap Icons" icon="bootstrap" href="https://icons.getbootstrap.com">
+Extensive library with over 1,800 icons. Works great for both fill and stroke styles.
+</Card>
+
+</CardGroup>
+
+<Warning>
+When using icons from external sources, make sure you have the right to use them in your project. Most icon libraries are open source, but always check the license.
+</Warning>
+
+## Registration timing
+
+Register your custom icons once when your app initializes, typically in your main JavaScript file:
+
+```js
+// app.js or main.js
+document.addEventListener('DOMContentLoaded', () => {
+    // Register all custom icons
+    toast.registerIcon('star', '<svg>...</svg>');
+    toast.registerIcon('bell', '<svg>...</svg>');
+    toast.registerIcon('crown', '<svg>...</svg>');
+});
+```
+
+<Note>
+If you're using Alpine.js (which Gooey Toast requires), register icons in the `alpine:init` event to ensure they're available before any components initialize:
+
+```js
+document.addEventListener('alpine:init', () => {
+    toast.registerIcon('custom-icon', '<svg>...</svg>');
+});
+```
+</Note>
+
+## Best practices
+
+<CardGroup cols={2}>
+
+<Card title="Consistent style" icon="palette">
+Use icons from the same family or with the same design style to maintain visual consistency.
+</Card>
+
+<Card title="Meaningful names" icon="tag">
+Choose descriptive icon names like `shopping-cart` instead of `icon1` for better maintainability.
+</Card>
+
+<Card title="Optimize SVGs" icon="gauge-high">
+Minify your SVG code to reduce file size. Remove unnecessary attributes and whitespace.
+</Card>
+
+<Card title="Fallback icons" icon="shield">
+If a custom icon fails to load, the toast will fall back to the type's default icon automatically.
+</Card>
+
+</CardGroup>

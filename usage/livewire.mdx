@@ -1,0 +1,314 @@
+---
+title: Livewire integration
+description: Trigger toasts from Livewire components using events
+---
+
+You can trigger toasts from Livewire components by dispatching browser events. No additional setup required beyond the standard Gooey Toast installation.
+
+## Basic usage
+
+Dispatch the `toast` event from any Livewire component:
+
+```php
+$this->dispatch('toast', [
+    'type'  => 'success',
+    'title' => 'Operation complete',
+]);
+```
+
+### Toast types
+
+<Tabs>
+  <Tab title="Success">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'success',
+        'title' => 'Saved successfully',
+    ]);
+    ```
+  </Tab>
+  <Tab title="Error">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'error',
+        'title' => 'Something went wrong',
+    ]);
+    ```
+  </Tab>
+  <Tab title="Warning">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'warning',
+        'title' => 'Please check your input',
+    ]);
+    ```
+  </Tab>
+  <Tab title="Info">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'info',
+        'title' => 'New notification',
+    ]);
+    ```
+  </Tab>
+  <Tab title="Loading">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'loading',
+        'title' => 'Processing...',
+    ]);
+    ```
+  </Tab>
+</Tabs>
+
+## Details and footer
+
+Add expandable detail rows and footer text:
+
+```php
+$this->dispatch('toast', [
+    'type'    => 'success',
+    'title'   => 'Deployment complete',
+    'details' => [
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch',      'value' => 'main'],
+    ],
+    'footer' => 'https://deploy.example.com/logs/3f8a2c1',
+]);
+```
+
+## Message text
+
+Display plain text instead of structured details:
+
+```php
+$this->dispatch('toast', [
+    'type'    => 'info',
+    'title'   => 'Melissa',
+    'avatar'  => '/avatars/melissa.jpg',
+    'message' => 'Please visit HR when you get a chance 👋',
+    'footer'  => '1h ago',
+]);
+```
+
+## Progress toasts
+
+Show a progress bar that updates as work completes:
+
+```php
+// Start
+$this->dispatch('toast', [
+    'id'       => 'upload-1',
+    'type'     => 'info',
+    'title'    => 'Uploading...',
+    'progress' => 0,
+]);
+
+// Update
+$this->dispatch('toast-update', [
+    'id'       => 'upload-1',
+    'progress' => 0.5,
+]);
+
+// Complete
+$this->dispatch('toast-update', [
+    'id'       => 'upload-1',
+    'progress' => 1,
+    'type'     => 'success',
+    'title'    => 'Uploaded!',
+]);
+```
+
+<Note>
+Use the `toast-update` event to update existing toasts by ID.
+</Note>
+
+## Undo toasts
+
+Show a countdown with an inline undo button:
+
+```php
+$this->dispatch('toast-undo', [
+    'title'    => 'Item deleted',
+    'event'    => 'confirm-delete',
+    'data'     => ['id' => $id],
+    'duration' => 5000,
+]);
+```
+
+The `event` fires when the countdown expires (only if the user doesn't click undo). You can listen for it in your Livewire component:
+
+```php
+protected $listeners = ['confirm-delete' => 'handleDelete'];
+
+public function handleDelete($data)
+{
+    $this->deleteItem($data['id']);
+}
+```
+
+## Persistent toasts
+
+Create toasts that never auto-dismiss:
+
+```php
+$this->dispatch('toast', [
+    'type'       => 'error',
+    'title'      => 'Payment failed',
+    'persistent' => true,
+    'details'    => [
+        ['label' => 'Reason', 'value' => 'Card declined'],
+    ],
+]);
+```
+
+Persistent toasts only close via the close button, an action button, or swipe gesture.
+
+## Custom colors
+
+Override the type color:
+
+```php
+$this->dispatch('toast', [
+    'type'  => 'success',
+    'title' => 'Branded notification',
+    'color' => '#8b5cf6',
+]);
+```
+
+## Updating toasts
+
+Update any toast by ID:
+
+```php
+$this->dispatch('toast-update', [
+    'id'    => 'my-toast',
+    'title' => 'Updated!',
+    'type'  => 'success',
+]);
+```
+
+## Complete example
+
+Here's a Livewire component that demonstrates various toast features:
+
+<CodeGroup>
+```php Component
+<?php
+
+namespace App\Livewire;
+
+use Livewire\Component;
+
+class TaskManager extends Component
+{
+    public function saveTask()
+    {
+        // Simulate async work
+        $taskId = 'task-' . uniqid();
+        
+        $this->dispatch('toast', [
+            'id'       => $taskId,
+            'type'     => 'loading',
+            'title'    => 'Saving task...',
+            'progress' => 0,
+        ]);
+        
+        // Update progress
+        sleep(1);
+        $this->dispatch('toast-update', [
+            'id'       => $taskId,
+            'progress' => 0.5,
+        ]);
+        
+        sleep(1);
+        $this->dispatch('toast-update', [
+            'id'       => $taskId,
+            'progress' => 1,
+            'type'     => 'success',
+            'title'    => 'Task saved!',
+        ]);
+    }
+    
+    public function deleteTask($id)
+    {
+        $this->dispatch('toast-undo', [
+            'title'    => 'Task deleted',
+            'event'    => 'confirm-delete',
+            'data'     => ['id' => $id],
+            'duration' => 5000,
+        ]);
+    }
+    
+    public function showError()
+    {
+        $this->dispatch('toast', [
+            'type'    => 'error',
+            'title'   => 'Upload failed',
+            'details' => [
+                ['label' => 'File', 'value' => 'report.pdf'],
+                ['label' => 'Error', 'value' => 'File too large'],
+            ],
+            'footer' => 'Max file size: 10 MB',
+        ]);
+    }
+    
+    public function render()
+    {
+        return view('livewire.task-manager');
+    }
+}
+```
+
+```blade View
+<div>
+    <button wire:click="saveTask">Save Task</button>
+    <button wire:click="deleteTask(123)">Delete Task</button>
+    <button wire:click="showError">Show Error</button>
+</div>
+```
+</CodeGroup>
+
+## Event reference
+
+<AccordionGroup>
+  <Accordion title="toast">
+    Dispatches a new toast notification.
+    
+    **Parameters:**
+    - `type` (string) — Toast type: `success`, `error`, `warning`, `info`, `loading`
+    - `title` (string) — Toast title (required)
+    - `id` (string) — Optional ID for updating later
+    - `message` (string) — Plain text message
+    - `avatar` (string) — Avatar image URL
+    - `avatarSize` (string) — Avatar size (e.g., `32px`)
+    - `details` (array) — Expandable key-value rows
+    - `footer` (string) — Footer text
+    - `actions` (array) — Action buttons
+    - `duration` (int) — Auto-dismiss duration in milliseconds
+    - `persistent` (bool) — Never auto-dismiss
+    - `color` (string) — Custom color (e.g., `#8b5cf6`)
+    - `progress` (float) — Progress bar value (0 to 1)
+    - `vibrate` (bool|array) — Vibration pattern
+  </Accordion>
+  
+  <Accordion title="toast-update">
+    Updates an existing toast by ID.
+    
+    **Parameters:**
+    - `id` (string) — Toast ID (required)
+    - Any property from the `toast` event
+  </Accordion>
+  
+  <Accordion title="toast-undo">
+    Shows an undo countdown toast.
+    
+    **Parameters:**
+    - `title` (string) — Toast title (required)
+    - `event` (string) — Event to dispatch on countdown expiry
+    - `undoEvent` (string) — Event to dispatch if user clicks undo
+    - `data` (array) — Data to pass with events
+    - `duration` (int) — Countdown duration in milliseconds
+    - `type` (string) — Toast type (default: `warning`)
+  </Accordion>
+</AccordionGroup>

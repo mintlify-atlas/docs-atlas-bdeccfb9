@@ -1,0 +1,476 @@
+---
+title: ToastBuilder
+description: Fluent API for building toast notifications
+---
+
+The `ToastBuilder` class provides a fluent interface for constructing detailed toast notifications with full control over all available options.
+
+## Getting started
+
+You get a `ToastBuilder` instance by calling `GooeyToast::make()`:
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+$builder = GooeyToast::make('Title', 'success');
+```
+
+## Content methods
+
+These methods control the toast's displayed content.
+
+### title()
+
+Set the toast title.
+
+```php
+title(string $title): self
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make()
+    ->title('Upload complete')
+    ->type('success')
+    ->send();
+```
+
+### type()
+
+Set the toast type.
+
+```php
+type(string $type): self
+```
+
+<ParamField path="type" type="string" required>
+  Toast type: `success`, `error`, `warning`, `info`, or `loading`
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Processing...')
+    ->type('loading')
+    ->send();
+```
+
+### message()
+
+Set a plain text message block.
+
+```php
+message(?string $message): self
+```
+
+<ParamField path="message" type="string | null" required>
+  Message text to display in the expanded toast body. If `null`, no message is added.
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Melissa', 'info')
+    ->message('Please visit HR when you get a chance 👋')
+    ->footer('1h ago')
+    ->send();
+```
+
+### details()
+
+Set all detail rows at once.
+
+```php
+details(array $details): self
+```
+
+<ParamField path="details" type="array" required>
+  Array of detail rows. Each row should have `label` and `value` keys.
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Deployment complete', 'success')
+    ->details([
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch', 'value' => 'main'],
+        ['label' => 'Commit', 'value' => 'a1b2c3d'],
+    ])
+    ->send();
+```
+
+### detail()
+
+Add a single detail row.
+
+```php
+detail(string $label, string $value): self
+```
+
+<ParamField path="label" type="string" required>
+  The detail row label (left column)
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  The detail row value (right column)
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Upload failed', 'error')
+    ->detail('File', 'report.pdf')
+    ->detail('Error', 'File too large')
+    ->detail('Max size', '10 MB')
+    ->send();
+```
+
+### footer()
+
+Set footer text.
+
+```php
+footer(string $footer): self
+```
+
+<ParamField path="footer" type="string" required>
+  Footer text to display at the bottom of the expanded toast
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Deployment complete', 'success')
+    ->footer('https://deploy.example.com/logs/3f8a2c1')
+    ->send();
+```
+
+## Action methods
+
+Add interactive buttons to your toast.
+
+### actions()
+
+Set all action buttons at once.
+
+```php
+actions(array $actions): self
+```
+
+<ParamField path="actions" type="array" required>
+  Array of action button configurations. Each action should have `label`, `event`, and optionally `icon`, `color`, and `confirm`.
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Message sent', 'success')
+    ->actions([
+        ['label' => 'Undo', 'icon' => 'undo', 'event' => 'undo-send'],
+        ['label' => 'View', 'icon' => 'external-link', 'event' => 'view-message'],
+    ])
+    ->send();
+```
+
+### action()
+
+Add a single action button.
+
+```php
+action(string $label, string $event, ?string $icon = null, ?string $color = null, bool $confirm = false): self
+```
+
+<ParamField path="label" type="string" required>
+  Button label text
+</ParamField>
+
+<ParamField path="event" type="string" required>
+  Window event name to dispatch when clicked
+</ParamField>
+
+<ParamField path="icon" type="string | null">
+  Icon name (e.g., `undo`, `external-link`, `trash`, `check`, `x`)
+</ParamField>
+
+<ParamField path="color" type="string | null">
+  Custom button color (hex or CSS color)
+</ParamField>
+
+<ParamField path="confirm" type="bool">
+  If `true`, requires two clicks to confirm the action. Defaults to `false`.
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Delete account', 'warning')
+    ->action('Delete', 'delete-account', 'trash', '#ef4444', confirm: true)
+    ->send();
+```
+
+**Available icons:**
+
+`external-link`, `eye`, `undo`, `retry`, `reply`, `map-pin`, `download`, `copy`, `trash`, `check`, `x`, `image`
+
+## Appearance methods
+
+Customize the visual appearance of your toast.
+
+### color()
+
+Set a custom color.
+
+```php
+color(string $color): self
+```
+
+<ParamField path="color" type="string" required>
+  Custom color (hex or CSS color) to override the default type color
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('VIP Access Granted', 'success')
+    ->color('#8b5cf6')
+    ->send();
+```
+
+### avatar()
+
+Set an avatar image URL.
+
+```php
+avatar(string $avatar): self
+```
+
+<ParamField path="avatar" type="string" required>
+  Avatar image URL to display instead of the default type icon
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('New message from John', 'info')
+    ->avatar('/avatars/john.jpg')
+    ->message('Hey, are you free for a quick call?')
+    ->send();
+```
+
+### avatarSize()
+
+Set the avatar size.
+
+```php
+avatarSize(string $size): self
+```
+
+<ParamField path="size" type="string" required>
+  Avatar size with CSS unit (e.g., `32px`, `2rem`). Defaults to `18px`.
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Welcome back!', 'success')
+    ->avatar('/avatars/user.png')
+    ->avatarSize('32px')
+    ->send();
+```
+
+## Behavior methods
+
+Control timing, persistence, and interactions.
+
+### duration()
+
+Set the auto-dismiss duration.
+
+```php
+duration(int $duration): self
+```
+
+<ParamField path="duration" type="int" required>
+  Duration in milliseconds before the toast auto-dismisses
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Quick notification', 'info')
+    ->duration(3000)
+    ->send();
+```
+
+### persistent()
+
+Make the toast persistent (never auto-dismiss).
+
+```php
+persistent(): self
+```
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Connection lost', 'error')
+    ->message('Please check your network connection.')
+    ->persistent()
+    ->send();
+```
+
+### vibrate()
+
+Enable device vibration (mobile only).
+
+```php
+vibrate(array|bool $pattern = true): self
+```
+
+<ParamField path="pattern" type="array | bool" required>
+  Either `true` for a simple vibration, or an array of milliseconds for a custom vibration pattern (e.g., `[200, 100, 200]`)
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+// Simple vibration
+GooeyToast::make('Alert!', 'info')
+    ->vibrate(true)
+    ->send();
+
+// Custom pattern
+GooeyToast::make('Incoming call', 'info')
+    ->vibrate([200, 100, 200])
+    ->send();
+```
+
+### id()
+
+Set a unique toast ID.
+
+```php
+id(string $id): self
+```
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the toast. Use this to update the toast later.
+</ParamField>
+
+**Returns:** `ToastBuilder` for chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Processing...', 'loading')
+    ->id('upload-123')
+    ->send();
+
+// Later, update it
+GooeyToast::make('Upload complete!', 'success')
+    ->id('upload-123')
+    ->send();
+```
+
+## Sending methods
+
+### send()
+
+Send the toast to the session.
+
+```php
+send(): Toast
+```
+
+**Returns:** `Toast` instance
+
+**Example:**
+
+```php
+GooeyToast::make('Deployment complete', 'success')
+    ->details([
+        ['label' => 'Environment', 'value' => 'Production'],
+    ])
+    ->send();
+```
+
+The toast is stored in the session and will be displayed on the next page load.
+
+### toArray()
+
+Get the toast data as an array without sending.
+
+```php
+toArray(): array
+```
+
+**Returns:** Array of toast data
+
+**Example:**
+
+```php
+$data = GooeyToast::make('Test', 'info')
+    ->message('This is a test')
+    ->toArray();
+
+// Returns:
+// [
+//     'title' => 'Test',
+//     'type' => 'info',
+//     'message' => 'This is a test',
+// ]
+```
+
+## Complete example
+
+Here's a comprehensive example using multiple methods:
+
+```php
+GooeyToast::make('Deployment complete', 'success')
+    ->message('Your application has been deployed successfully.')
+    ->details([
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch', 'value' => 'main'],
+        ['label' => 'Commit', 'value' => 'a1b2c3d'],
+    ])
+    ->footer('https://deploy.example.com/logs/3f8a2c1')
+    ->action('View Logs', 'view-logs', 'external-link', '#3b82f6')
+    ->action('Rollback', 'rollback', 'undo', '#ef4444', confirm: true)
+    ->duration(8000)
+    ->vibrate([200, 100, 200])
+    ->send();
+```

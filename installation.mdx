@@ -1,0 +1,203 @@
+---
+title: Installation
+description: Install Gooey Toast in your Laravel application and configure the component
+---
+
+## Requirements
+
+Before installing Gooey Toast, make sure your environment meets these requirements:
+
+- PHP 8.1 or higher
+- Laravel 10, 11, or 12
+- Alpine.js (included with Livewire, or install manually)
+
+## Install via Composer
+
+Install the package using Composer:
+
+```bash
+composer require a89s/gooey-toast
+```
+
+The package uses Laravel's auto-discovery feature, so the service provider will be registered automatically. No manual configuration needed.
+
+## Add the component to your layout
+
+Add the Gooey Toast component to your main layout file, just before the closing `</body>` tag:
+
+```blade app.blade.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+</head>
+<body>
+    <!-- Your app content -->
+    {{ $slot }}
+
+    <!-- Gooey Toast component -->
+    <x-gooey-toast />
+</body>
+</html>
+```
+
+<Note>
+  The component must be placed before the closing `</body>` tag to ensure proper rendering and functionality.
+</Note>
+
+## Install Alpine.js (if not using Livewire)
+
+Gooey Toast requires Alpine.js to function. If you're already using Livewire, Alpine.js is included automatically. For non-Livewire projects, add Alpine to your layout:
+
+```html app.blade.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+</head>
+<body>
+    {{ $slot }}
+
+    <x-gooey-toast />
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+</body>
+</html>
+```
+
+<Tip>
+  For production applications, consider installing Alpine.js via npm instead of using the CDN. See the [Alpine.js installation guide](https://alpinejs.dev/essentials/installation) for details.
+</Tip>
+
+## Advanced setup: Separate styles and scripts
+
+If you need more control over where styles and scripts are loaded, use the Blade directives instead of the component:
+
+```blade app.blade.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+
+    <!-- Gooey Toast styles in <head> -->
+    @gooeyToastStyles
+</head>
+<body>
+    {{ $slot }}
+
+    <!-- Gooey Toast scripts before </body> -->
+    @gooeyToastScripts
+</body>
+</html>
+```
+
+This approach gives you fine-grained control over asset loading order, which can be useful for performance optimization or when integrating with asset bundlers.
+
+## Publish configuration (optional)
+
+To customize default settings like position, duration, and theme, publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag=gooey-toast-config
+```
+
+This creates `config/gooey-toast.php` with the following options:
+
+```php config/gooey-toast.php
+<?php
+
+return [
+    'position'   => 'bottom-center', // bottom-center, bottom-right, top-center, top-right
+    'duration'   => 5000,            // auto-dismiss ms (0 = never)
+    'max_toasts' => 5,
+    'theme'      => 'dark',          // dark, light
+];
+```
+
+<AccordionGroup>
+  <Accordion title="Configuration options explained">
+    **position**
+    
+    Controls where toasts appear on screen. Available options:
+    - `bottom-center` (default)
+    - `bottom-right`
+    - `top-center`
+    - `top-right`
+
+    **duration**
+    
+    Default auto-dismiss time in milliseconds. Set to `0` to make toasts persistent by default. Individual toasts can override this value.
+
+    **max_toasts**
+    
+    Maximum number of visible toasts. When exceeded, older toasts are stacked and a counter badge shows the number of hidden notifications.
+
+    **theme**
+    
+    Default color theme. Options are `dark` or `light`. You can switch themes at runtime using JavaScript.
+  </Accordion>
+</AccordionGroup>
+
+## Publish views (optional)
+
+If you need to customize the component markup, publish the views:
+
+```bash
+php artisan vendor:publish --tag=gooey-toast-views
+```
+
+Views will be published to `resources/views/vendor/gooey-toast/`. You can then modify:
+
+- `components/container.blade.php` - Main component structure
+- `partials/styles.blade.php` - CSS styles
+- `partials/scripts.blade.php` - JavaScript functionality
+
+<Warning>
+  Customizing views gives you full control but means you'll need to manually merge updates when upgrading the package. Only publish views if you need significant customization.
+</Warning>
+
+## Verify installation
+
+To verify everything is working, create a test route and trigger a simple toast:
+
+<Steps>
+  <Step title="Create a test route">
+    Add this route to your `routes/web.php`:
+
+    ```php routes/web.php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    Route::get('/test-toast', function () {
+        GooeyToast::success('Installation successful!');
+        return view('welcome');
+    });
+    ```
+  </Step>
+
+  <Step title="Visit the route">
+    Navigate to `/test-toast` in your browser. You should see a green success toast slide up from the bottom of the screen.
+  </Step>
+
+  <Step title="Clean up">
+    Remove the test route once you've verified the installation works.
+  </Step>
+</Steps>
+
+## Next steps
+
+Now that Gooey Toast is installed, you're ready to create your first toast notification:
+
+<Card
+  title="Quick start guide"
+  icon="rocket"
+  href="/quickstart"
+>
+  Learn how to trigger toasts from JavaScript, Livewire, and PHP
+</Card>

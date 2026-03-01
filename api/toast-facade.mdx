@@ -1,0 +1,227 @@
+---
+title: GooeyToast facade
+description: Quick toast methods using the GooeyToast facade
+---
+
+The `GooeyToast` facade provides convenient static methods for creating toast notifications from anywhere in your Laravel application. No Livewire required.
+
+## Import
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+```
+
+## Quick toast methods
+
+These methods create and send a toast in a single call.
+
+### success()
+
+Create a success toast.
+
+```php
+GooeyToast::success(string $title, ?string $message = null): Toast
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="message" type="string | null">
+  Optional message text to display in the expanded toast body
+</ParamField>
+
+**Returns:** `Toast` instance
+
+**Example:**
+
+```php
+GooeyToast::success('Saved!');
+
+GooeyToast::success('Deployment complete', 'Your changes are now live.');
+```
+
+### error()
+
+Create an error toast.
+
+```php
+GooeyToast::error(string $title, ?string $message = null): Toast
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="message" type="string | null">
+  Optional message text to display in the expanded toast body
+</ParamField>
+
+**Returns:** `Toast` instance
+
+**Example:**
+
+```php
+GooeyToast::error('Upload failed');
+
+GooeyToast::error('Payment declined', 'Your card was declined.');
+```
+
+### warning()
+
+Create a warning toast.
+
+```php
+GooeyToast::warning(string $title, ?string $message = null): Toast
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="message" type="string | null">
+  Optional message text to display in the expanded toast body
+</ParamField>
+
+**Returns:** `Toast` instance
+
+**Example:**
+
+```php
+GooeyToast::warning('Session expiring soon');
+
+GooeyToast::warning('Low disk space', 'Only 5% storage remaining.');
+```
+
+### info()
+
+Create an info toast.
+
+```php
+GooeyToast::info(string $title, ?string $message = null): Toast
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="message" type="string | null">
+  Optional message text to display in the expanded toast body
+</ParamField>
+
+**Returns:** `Toast` instance
+
+**Example:**
+
+```php
+GooeyToast::info('System update available');
+
+GooeyToast::info('New feature', 'Check out our new dashboard.');
+```
+
+## Builder method
+
+### make()
+
+Create a new toast builder for advanced configuration.
+
+```php
+GooeyToast::make(?string $title = null, ?string $type = null): ToastBuilder
+```
+
+<ParamField path="title" type="string | null">
+  The toast title text
+</ParamField>
+
+<ParamField path="type" type="string | null">
+  Toast type: `success`, `error`, `warning`, `info`, or `loading`. Defaults to `info`.
+</ParamField>
+
+**Returns:** [`ToastBuilder`](/api/toast-builder) instance for method chaining
+
+**Example:**
+
+```php
+GooeyToast::make('Deployment complete', 'success')
+    ->details([
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch', 'value' => 'main'],
+    ])
+    ->footer('https://deploy.example.com/logs/123')
+    ->duration(5000)
+    ->send();
+```
+
+## Advanced usage
+
+### With avatar
+
+Display a user avatar instead of the default type icon:
+
+```php
+GooeyToast::make('New message from John', 'info')
+    ->avatar('/avatars/john.jpg')
+    ->avatarSize('32px')
+    ->message('Hey, are you free for a quick call?')
+    ->send();
+```
+
+### With action buttons
+
+Add interactive buttons to your toast:
+
+```php
+GooeyToast::make('Message sent', 'success')
+    ->action('Undo', 'undo-send', 'undo')
+    ->action('View', 'view-message', 'external-link', '#3b82f6')
+    ->send();
+```
+
+### Persistent toast
+
+Create a toast that won't auto-dismiss:
+
+```php
+GooeyToast::make('Connection lost', 'error')
+    ->message('Please check your network connection.')
+    ->persistent()
+    ->send();
+```
+
+### Custom color
+
+Override the default type color:
+
+```php
+GooeyToast::make('VIP Access Granted', 'success')
+    ->color('#8b5cf6')
+    ->send();
+```
+
+### With vibration
+
+Trigger device vibration (mobile only):
+
+```php
+GooeyToast::make('Incoming call', 'info')
+    ->vibrate([200, 100, 200])
+    ->persistent()
+    ->send();
+```
+
+## Session-based delivery
+
+All toasts created via the facade are automatically stored in the session and displayed on the next page load. This is perfect for post-redirect notifications:
+
+```php
+public function store(Request $request)
+{
+    // Save data...
+    
+    GooeyToast::success('Product created successfully');
+    
+    return redirect()->route('products.index');
+}
+```
+
+The toast will appear after the redirect completes.

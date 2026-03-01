@@ -1,0 +1,261 @@
+---
+title: Updating toasts
+description: Update existing toasts in real-time by ID to show progress, change status, or modify content
+---
+
+You can update any toast after it's been created by referencing its ID. This is useful for showing progress, changing status from loading to success, or modifying the content based on events.
+
+## Setting a toast ID
+
+To update a toast, you first need to assign it a unique ID when creating it.
+
+<CodeGroup>
+
+```js JavaScript
+// Create a toast with a specific ID
+toast({
+    id: 'my-toast',
+    type: 'info',
+    title: 'Processing...'
+});
+```
+
+```php PHP
+GooeyToast::make('Processing...', 'info')
+    ->id('my-toast')
+    ->send();
+```
+
+```php Livewire
+$this->dispatch('toast', [
+    'id' => 'my-toast',
+    'type' => 'info',
+    'title' => 'Processing...'
+]);
+```
+
+</CodeGroup>
+
+## Updating toast properties
+
+Once a toast has an ID, you can update any of its properties using `toast.update()`.
+
+<CodeGroup>
+
+```js JavaScript
+// Update the title and type
+toast.update('my-toast', {
+    title: 'Complete!',
+    type: 'success'
+});
+```
+
+```php Livewire
+$this->dispatch('toast-update', [
+    'id' => 'my-toast',
+    'title' => 'Complete!',
+    'type' => 'success'
+]);
+```
+
+</CodeGroup>
+
+## Common use cases
+
+### Loading to success
+
+Show a loading spinner that updates to a success message when complete.
+
+```js
+// Start with loading state
+toast({
+    id: 'save-operation',
+    type: 'loading',
+    title: 'Saving changes...',
+    duration: 0
+});
+
+// After operation completes
+fetch('/api/save', { method: 'POST' })
+    .then(() => {
+        toast.update('save-operation', {
+            type: 'success',
+            title: 'Changes saved!',
+            duration: 3000
+        });
+    });
+```
+
+### Showing progress
+
+Update a toast to show upload or processing progress.
+
+```js
+// Create initial toast
+toast({
+    id: 'upload-files',
+    type: 'info',
+    title: 'Uploading files...',
+    progress: 0,
+    duration: 0
+});
+
+// Update progress as upload continues
+toast.update('upload-files', { progress: 0.33 });
+toast.update('upload-files', { progress: 0.66 });
+
+// Complete the upload
+toast.update('upload-files', {
+    progress: 1,
+    type: 'success',
+    title: 'Upload complete!'
+});
+```
+
+<Note>
+The progress bar is automatically shown when the `progress` property is set to a value between 0 and 1.
+</Note>
+
+### Changing colors
+
+Update the toast color dynamically based on state changes.
+
+```js
+toast({
+    id: 'status-check',
+    type: 'info',
+    title: 'Checking status...',
+    color: '#3b82f6'
+});
+
+// Update to warning state
+toast.update('status-check', {
+    type: 'warning',
+    title: 'Connection unstable',
+    color: '#f59e0b'
+});
+```
+
+## Updatable properties
+
+You can update any of these properties:
+
+- **type** — Change between `success`, `error`, `warning`, `info`, or `loading`
+- **title** — Update the main heading
+- **message** — Change the message text block
+- **icon** — Switch to a different icon (custom or built-in)
+- **avatar** — Change the avatar image URL
+- **avatarSize** — Adjust avatar dimensions
+- **color** — Override the type color
+- **progress** — Update progress bar (0 to 1)
+- **persistent** — Toggle auto-dismiss behavior
+- **duration** — Change how long the toast stays visible
+
+## Progress toast helper
+
+For progress updates, use the dedicated `toast.progress()` helper which handles the ID automatically.
+
+<Steps>
+
+<Step title="Create a progress toast">
+The helper returns an ID you'll use for updates:
+
+```js
+const id = toast.progress('Uploading photos...');
+```
+</Step>
+
+<Step title="Update the progress">
+Pass the ID and a value between 0 and 1:
+
+```js
+toast.progress(id, 0.25);
+toast.progress(id, 0.5);
+toast.progress(id, 0.75);
+```
+</Step>
+
+<Step title="Complete the operation">
+When progress reaches 1, the toast automatically switches to success:
+
+```js
+toast.progress(id, 1, 'Upload complete!');
+```
+</Step>
+
+</Steps>
+
+<Note>
+You can also pass options as the second parameter when creating:
+
+```js
+const id = toast.progress('Processing...', {
+    type: 'warning',
+    color: '#8b5cf6'
+});
+```
+</Note>
+
+## Livewire progress updates
+
+In Livewire components, dispatch the `toast-update` event as your operation progresses.
+
+```php
+public function uploadPhotos()
+{
+    // Start progress toast
+    $this->dispatch('toast', [
+        'id' => 'photo-upload',
+        'type' => 'info',
+        'title' => 'Uploading photos...',
+        'progress' => 0,
+        'duration' => 0,
+    ]);
+
+    foreach ($this->photos as $index => $photo) {
+        // Upload photo
+        Storage::put('photos/' . $photo->getClientOriginalName(), $photo->get());
+
+        // Update progress
+        $progress = ($index + 1) / count($this->photos);
+        $this->dispatch('toast-update', [
+            'id' => 'photo-upload',
+            'progress' => $progress,
+        ]);
+    }
+
+    // Mark complete
+    $this->dispatch('toast-update', [
+        'id' => 'photo-upload',
+        'progress' => 1,
+        'type' => 'success',
+        'title' => 'All photos uploaded!',
+    ]);
+}
+```
+
+## Best practices
+
+<CardGroup cols={2}>
+
+<Card title="Use descriptive IDs" icon="tag">
+Choose IDs that clearly describe the operation, like `order-123-payment` rather than generic IDs.
+</Card>
+
+<Card title="Set duration to 0 for loading" icon="clock">
+Persistent toasts (duration: 0) are ideal for operations that may take varying amounts of time.
+</Card>
+
+<Card title="Update type on completion" icon="check">
+Always change the type to `success` or `error` when the operation finishes so users get clear feedback.
+</Card>
+
+<Card title="Include final message" icon="message">
+When completing an update, provide a meaningful completion message like "Upload complete!" instead of leaving the loading message.
+</Card>
+
+</CardGroup>
+
+<Warning>
+If you try to update a toast that doesn't exist or has already been dismissed, the update will be silently ignored. Always ensure the toast ID matches an active toast.
+</Warning>

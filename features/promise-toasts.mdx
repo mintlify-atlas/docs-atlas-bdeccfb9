@@ -1,0 +1,228 @@
+---
+title: Promise toasts
+description: Automatically handle loading, success, and error states for async operations
+---
+
+Promise toasts automatically manage the lifecycle of async operations. They start with a loading spinner, then resolve to either a success or error state based on the promise result.
+
+## How it works
+
+Pass a promise and message strings to `toast.promise()`. The toast automatically:
+
+1. Shows a loading spinner with your loading message
+2. Switches to success if the promise resolves
+3. Switches to error if the promise rejects
+
+## Basic example
+
+```js
+toast.promise(fetch('/api/save'), {
+    loading: 'Saving...',
+    success: 'Saved!',
+    error: 'Failed to save',
+});
+```
+
+<Note>
+  The method returns the original promise, so you can chain `.then()` and `.catch()` as needed.
+</Note>
+
+## Complete example with error handling
+
+```js
+const saveData = async () => {
+  try {
+    await toast.promise(
+      fetch('/api/users/123', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Jane Doe' }),
+      }),
+      {
+        loading: 'Saving user...',
+        success: 'User updated successfully!',
+        error: 'Failed to update user',
+      }
+    );
+    
+    // Continue with next steps
+    refreshUserList();
+  } catch (error) {
+    console.error(error);
+  }
+};
+```
+
+## Chaining promises
+
+Since `toast.promise()` returns the original promise, you can chain additional operations:
+
+```js
+toast.promise(
+  fetch('/api/data').then(res => res.json()),
+  {
+    loading: 'Fetching data...',
+    success: 'Data loaded!',
+    error: 'Failed to fetch',
+  }
+)
+.then(data => {
+  console.log('Received:', data);
+  processData(data);
+})
+.catch(error => {
+  console.error('Error:', error);
+});
+```
+
+## Use cases
+
+<CardGroup cols={2}>
+  <Card title="API calls" icon="cloud">
+    Wrap fetch requests to show loading, success, and error states automatically
+  </Card>
+  <Card title="Form submissions" icon="paper-plane">
+    Give instant feedback when users submit forms without manual state management
+  </Card>
+  <Card title="File operations" icon="file">
+    Show progress for file uploads, downloads, or processing
+  </Card>
+  <Card title="Database operations" icon="database">
+    Provide feedback for create, update, or delete operations
+  </Card>
+</CardGroup>
+
+## Real-world examples
+
+### Form submission
+
+```js
+const handleSubmit = async (formData) => {
+  await toast.promise(
+    fetch('/api/contact', {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: { 'Content-Type': 'application/json' },
+    }),
+    {
+      loading: 'Sending message...',
+      success: 'Message sent! We\'ll get back to you soon.',
+      error: 'Failed to send message. Please try again.',
+    }
+  );
+  
+  // Reset form
+  resetForm();
+};
+```
+
+### Batch operation
+
+```js
+const deleteSelected = async (itemIds) => {
+  await toast.promise(
+    Promise.all(
+      itemIds.map(id => 
+        fetch(`/api/items/${id}`, { method: 'DELETE' })
+      )
+    ),
+    {
+      loading: `Deleting ${itemIds.length} items...`,
+      success: `Successfully deleted ${itemIds.length} items`,
+      error: 'Some items could not be deleted',
+    }
+  );
+  
+  refreshItemList();
+};
+```
+
+### Authentication
+
+```js
+const login = async (credentials) => {
+  const response = await toast.promise(
+    fetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+      headers: { 'Content-Type': 'application/json' },
+    }),
+    {
+      loading: 'Signing in...',
+      success: 'Welcome back!',
+      error: 'Invalid credentials',
+    }
+  );
+  
+  const data = await response.json();
+  localStorage.setItem('token', data.token);
+  redirectToDashboard();
+};
+```
+
+## Advanced: Dynamic messages
+
+If you need to customize the success or error message based on the promise result, handle the promise yourself and use regular toasts:
+
+```js
+try {
+  toast({ type: 'loading', title: 'Processing...', id: 'process' });
+  
+  const result = await fetch('/api/process');
+  const data = await result.json();
+  
+  toast.update('process', {
+    type: 'success',
+    title: `Processed ${data.count} items`,
+  });
+} catch (error) {
+  toast.update('process', {
+    type: 'error',
+    title: `Error: ${error.message}`,
+  });
+}
+```
+
+<Warning>
+  Promise toasts don't support progress updates. For operations with measurable progress, use [progress toasts](/features/progress-toasts) instead.
+</Warning>
+
+## Comparison with manual handling
+
+### Without promise toasts
+
+```js
+const save = async () => {
+  const id = toast({ type: 'loading', title: 'Saving...' });
+  
+  try {
+    await fetch('/api/save');
+    toast.update(id, { type: 'success', title: 'Saved!' });
+  } catch (error) {
+    toast.update(id, { type: 'error', title: 'Failed to save' });
+  }
+};
+```
+
+### With promise toasts
+
+```js
+const save = async () => {
+  await toast.promise(fetch('/api/save'), {
+    loading: 'Saving...',
+    success: 'Saved!',
+    error: 'Failed to save',
+  });
+};
+```
+
+Promise toasts eliminate the boilerplate of manual state management.
+
+## Tips
+
+- Keep loading messages action-oriented: "Saving...", "Uploading...", "Processing..."
+- Make success messages celebratory but concise: "Saved!", "Done!", "Success!"
+- Error messages should be clear about what failed: "Failed to save", "Upload failed"
+- For long-running operations, consider using [progress toasts](/features/progress-toasts) instead
+- Chain `.then()` for additional logic after the toast completes
+- Remember that promise toasts automatically handle cleanup — you don't need to manually update or dismiss them

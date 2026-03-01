@@ -1,0 +1,276 @@
+---
+title: Configuration
+description: Configure global toast behavior and defaults
+---
+
+Gooey Toast can be configured globally through the config file or at runtime using JavaScript methods.
+
+## Publishing the config file
+
+To customize the default configuration, publish the config file:
+
+```bash
+php artisan vendor:publish --tag=gooey-toast-config
+```
+
+This creates `config/gooey-toast.php` in your Laravel application.
+
+## Configuration options
+
+All configuration options with their default values:
+
+```php
+<?php
+
+return [
+    'position'   => 'bottom-center',
+    'duration'   => 5000,
+    'max_toasts' => 5,
+    'theme'      => 'dark',
+];
+```
+
+### Position
+
+<ParamField path="position" type="string" default="bottom-center">
+  Controls where toasts appear on the screen.
+  
+  **Accepted values:**
+  - `bottom-center`
+  - `bottom-right`
+  - `top-center`
+  - `top-right`
+</ParamField>
+
+#### Example
+
+```php
+'position' => 'bottom-right',
+```
+
+<Note>
+  Position is set globally and cannot be changed per toast. All toasts in your application will appear in the configured position.
+</Note>
+
+### Duration
+
+<ParamField path="duration" type="integer" default="5000">
+  Default auto-dismiss duration in milliseconds.
+  
+  Set to `0` to disable auto-dismiss globally.
+</ParamField>
+
+#### Example
+
+```php
+// Auto-dismiss after 3 seconds
+'duration' => 3000,
+
+// Never auto-dismiss
+'duration' => 0,
+```
+
+<Info>
+  You can override the global duration for individual toasts using the `duration` option or make specific toasts persistent.
+</Info>
+
+#### Override duration per toast
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    // Custom duration for this toast
+    toast({ 
+        type: 'success', 
+        title: 'Saved!', 
+        duration: 8000 
+    });
+
+    // Persistent toast (never auto-dismiss)
+    toast({ 
+        type: 'error', 
+        title: 'Connection lost', 
+        persistent: true 
+    });
+    ```
+  </Tab>
+  <Tab title="PHP API">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    // Custom duration
+    GooeyToast::make('Saved!', 'success')
+        ->duration(8000)
+        ->send();
+
+    // Persistent toast
+    GooeyToast::make('Connection lost', 'error')
+        ->persistent()
+        ->send();
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    // Custom duration
+    $this->dispatch('toast', [
+        'type'     => 'success',
+        'title'    => 'Saved!',
+        'duration' => 8000,
+    ]);
+
+    // Persistent toast
+    $this->dispatch('toast', [
+        'type'       => 'error',
+        'title'      => 'Connection lost',
+        'persistent' => true,
+    ]);
+    ```
+  </Tab>
+</Tabs>
+
+### Max toasts
+
+<ParamField path="max_toasts" type="integer" default="5">
+  Maximum number of toasts that can be displayed simultaneously.
+  
+  When this limit is reached, the oldest toast is automatically removed when a new one appears.
+</ParamField>
+
+#### Example
+
+```php
+// Show up to 10 toasts at once
+'max_toasts' => 10,
+
+// Show only 3 toasts at once
+'max_toasts' => 3,
+```
+
+<Note>
+  This limit helps prevent toast overflow on the screen. Adjust based on your UI needs and screen size considerations.
+</Note>
+
+### Theme
+
+<ParamField path="theme" type="string" default="dark">
+  Default color theme for toasts.
+  
+  **Accepted values:**
+  - `dark`
+  - `light`
+</ParamField>
+
+#### Example
+
+```php
+'theme' => 'light',
+```
+
+<Info>
+  The theme can also be changed at runtime using JavaScript. See the [Theming](/core/theming) page for details.
+</Info>
+
+## Full configuration example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Display toasts in the bottom-right corner
+    'position' => 'bottom-right',
+    
+    // Auto-dismiss after 3 seconds
+    'duration' => 3000,
+    
+    // Show up to 8 toasts at once
+    'max_toasts' => 8,
+    
+    // Use light theme by default
+    'theme' => 'light',
+];
+```
+
+## Per-toast options
+
+While the config file sets global defaults, many options can be customized per toast:
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({
+        type: 'success',
+        title: 'Notification',
+        duration: 8000,              // Override config duration
+        persistent: false,           // Never auto-dismiss
+        color: '#8b5cf6',            // Custom color
+        message: 'Text block',       // Plain text message
+        avatar: '/path/to/image.jpg', // Avatar image
+        avatarSize: '32px',          // Avatar size
+        details: [                   // Expandable rows
+            { label: 'Key', value: 'Value' },
+        ],
+        footer: 'Footer text',
+        actions: [                   // Action buttons
+            { label: 'Click me', icon: 'check', event: 'my-event' },
+        ],
+        progress: 0.5,               // Progress bar (0 to 1)
+        vibrate: true,               // Vibrate on mobile
+    });
+    ```
+  </Tab>
+  <Tab title="PHP API">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('Deployment complete', 'success')
+        ->details([
+            ['label' => 'Environment', 'value' => 'Production'],
+            ['label' => 'Branch', 'value' => 'main'],
+        ])
+        ->footer('https://deploy.example.com/logs/123')
+        ->duration(8000)
+        ->color('#8b5cf6')
+        ->vibrate([200, 100, 200])
+        ->send();
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'     => 'success',
+        'title'    => 'Deployment complete',
+        'details'  => [
+            ['label' => 'Environment', 'value' => 'Production'],
+            ['label' => 'Branch', 'value' => 'main'],
+        ],
+        'footer'   => 'https://deploy.example.com/logs/123',
+        'duration' => 8000,
+        'color'    => '#8b5cf6',
+    ]);
+    ```
+  </Tab>
+</Tabs>
+
+## Persistent toasts
+
+Persistent toasts never auto-dismiss and can only be removed by:
+- Clicking the close button
+- Clicking an action button
+- Swiping to dismiss
+
+```js
+toast({ 
+    type: 'error', 
+    title: 'Payment failed', 
+    persistent: true,
+    details: [
+        { label: 'Reason', value: 'Card declined' },
+    ],
+});
+```
+
+<Note>
+  Persistent toasts ignore both the global `duration` config and any duration set on the individual toast.
+</Note>

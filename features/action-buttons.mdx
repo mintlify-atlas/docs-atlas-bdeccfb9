@@ -1,0 +1,229 @@
+---
+title: Action buttons
+description: Add interactive buttons with icons and confirmation to your toasts
+---
+
+Action buttons let users take immediate action directly from a toast. Each button can dispatch a custom event, display an icon, use a custom color, and optionally require confirmation before proceeding.
+
+## Basic example
+
+Add buttons to the expanded toast body:
+
+```js
+toast({
+    type: 'success',
+    title: 'Message sent',
+    actions: [
+        { label: 'Undo', icon: 'undo', event: 'undo-send' },
+        { label: 'View', icon: 'external-link', event: 'view-message', data: { id: 123 } },
+    ],
+});
+
+// Listen for the event
+window.addEventListener('view-message', (e) => {
+    console.log(e.detail); // { id: 123 }
+});
+```
+
+<Note>
+  When there are 2+ buttons, they display side by side. A single button stays full width.
+</Note>
+
+## Action button properties
+
+Each action button accepts these properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `label` | string | Button text |
+| `icon` | string | Icon name (optional) |
+| `event` | string | Custom window event to dispatch |
+| `data` | object | Data passed to event listener (optional) |
+| `color` | string | Custom button color (optional) |
+| `confirm` | boolean | Require two-step confirmation (optional) |
+
+## Custom colors
+
+Give individual buttons a custom color with a tinted background:
+
+```js
+toast({
+    type: 'info',
+    title: 'Incoming call',
+    persistent: true,
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept', color: '#22c55e' },
+        { label: 'Decline', icon: 'x', event: 'decline', color: '#ef4444' },
+    ],
+});
+```
+
+## Confirmation flow
+
+Add `confirm: true` to require a two-step click. The first click changes the label to "Sure?" for 3 seconds. If clicked again, the event fires. If not, the label reverts.
+
+```js
+toast({
+    type: 'warning',
+    title: 'Delete account',
+    actions: [
+        { 
+          label: 'Delete', 
+          icon: 'trash', 
+          event: 'delete-account', 
+          color: '#ef4444', 
+          confirm: true 
+        },
+    ],
+});
+```
+
+<Warning>
+  Use confirmation for destructive actions like deletes. It prevents accidental clicks.
+</Warning>
+
+## Available icons
+
+Gooey Toast includes these built-in icons:
+
+- `external-link`
+- `eye`
+- `undo`
+- `retry`
+- `reply`
+- `map-pin`
+- `download`
+- `copy`
+- `trash`
+- `check`
+- `x`
+- `image`
+
+### Registering custom icons
+
+Add your own icons using SVG markup:
+
+```js
+toast.registerIcon('star', '<svg viewBox="0 0 24 24">...</svg>');
+
+// Use in toasts
+toast({ 
+  type: 'success', 
+  title: 'Favorited!', 
+  actions: [
+    { label: 'View', icon: 'star', event: 'view-favorites' }
+  ]
+});
+```
+
+## Event handling
+
+All action buttons dispatch window events when clicked:
+
+```js
+toast({
+    type: 'info',
+    title: 'New comment',
+    actions: [
+        { label: 'Reply', icon: 'reply', event: 'reply-comment', data: { commentId: 42 } },
+        { label: 'View', icon: 'eye', event: 'view-comment', data: { commentId: 42 } },
+    ],
+});
+
+window.addEventListener('reply-comment', (e) => {
+    const { commentId } = e.detail;
+    openReplyDialog(commentId);
+});
+
+window.addEventListener('view-comment', (e) => {
+    const { commentId } = e.detail;
+    scrollToComment(commentId);
+});
+```
+
+<Note>
+  Clicking any action button automatically dismisses the toast.
+</Note>
+
+## Use cases
+
+<CardGroup cols={2}>
+  <Card title="Quick actions" icon="bolt">
+    Let users undo, retry, or view details without leaving their current context
+  </Card>
+  <Card title="Navigation" icon="arrow-up-right-from-square">
+    Link to related pages or open modals directly from notifications
+  </Card>
+  <Card title="Confirmations" icon="shield-check">
+    Add a safety layer for destructive operations with two-step confirmation
+  </Card>
+  <Card title="Multi-choice" icon="list-check">
+    Present multiple options like Accept/Decline for incoming requests
+  </Card>
+</CardGroup>
+
+## Real-world examples
+
+### File upload with actions
+
+```js
+toast({
+    type: 'success',
+    title: 'File uploaded',
+    details: [
+        { label: 'Name', value: 'report.pdf' },
+        { label: 'Size', value: '2.4 MB' },
+    ],
+    actions: [
+        { label: 'View', icon: 'eye', event: 'view-file', data: { fileId: 123 } },
+        { label: 'Download', icon: 'download', event: 'download-file', data: { fileId: 123 } },
+        { label: 'Delete', icon: 'trash', event: 'delete-file', color: '#ef4444', confirm: true },
+    ],
+});
+```
+
+### Incoming call
+
+```js
+toast({
+    type: 'info',
+    title: 'Incoming call from Sarah',
+    avatar: '/avatars/sarah.jpg',
+    persistent: true,
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept-call', color: '#22c55e', data: { callId: 'abc123' } },
+        { label: 'Decline', icon: 'x', event: 'decline-call', color: '#ef4444', data: { callId: 'abc123' } },
+    ],
+});
+
+window.addEventListener('accept-call', (e) => {
+    initiateCall(e.detail.callId);
+});
+
+window.addEventListener('decline-call', (e) => {
+    rejectCall(e.detail.callId);
+});
+```
+
+### Task completion
+
+```js
+toast({
+    type: 'success',
+    title: 'Task completed',
+    message: 'Design review for homepage redesign',
+    actions: [
+        { label: 'Undo', icon: 'undo', event: 'undo-complete' },
+        { label: 'Next task', icon: 'external-link', event: 'next-task' },
+    ],
+});
+```
+
+## Tips
+
+- Use icons consistently — the same icon should always mean the same action
+- Limit to 2-3 actions per toast to avoid overwhelming users
+- Put the primary action first (left position)
+- Use persistent toasts when actions require immediate attention
+- Combine with custom colors to create visual hierarchy
+- Always test confirmation flows to ensure the "Sure?" label appears as expected

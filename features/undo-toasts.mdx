@@ -1,0 +1,157 @@
+---
+title: Undo toasts
+description: Give users a chance to undo destructive actions with countdown timers
+---
+
+Undo toasts show an inline undo button with a countdown timer. If the user doesn't click undo before time runs out, a confirmation event fires. This pattern is perfect for soft deletes and reversible actions.
+
+## How it works
+
+When you create an undo toast, it displays a countdown timer and an undo button. You listen for a confirmation event that only fires if the user doesn't click undo. This lets you delay destructive operations until you're sure the user didn't make a mistake.
+
+## Basic example
+
+```js
+toast.undo('Message deleted', 'confirm-delete', { id: 123 });
+
+// Listen for confirmation — only fires if NOT undone
+window.addEventListener('confirm-delete', (e) => {
+    fetch(`/api/messages/${e.detail.id}`, { method: 'DELETE' });
+});
+```
+
+<Note>
+  The confirmation event only fires when the countdown expires. If the user clicks undo, the event never fires and the toast simply dismisses.
+</Note>
+
+## Full options
+
+You can customize the undo toast with additional options:
+
+```js
+toast.undo({
+    title: 'Item archived',
+    event: 'confirm-archive',      // fires on countdown expiry
+    undoEvent: 'undo-archive',     // fires if user clicks undo (optional)
+    data: { id: 456 },
+    duration: 8000,                // countdown length in ms
+    type: 'info',                  // toast type (default: warning)
+});
+```
+
+### Event data
+
+The `data` object you provide gets passed to both the confirm and undo event listeners:
+
+```js
+window.addEventListener('confirm-archive', (e) => {
+    console.log(e.detail); // { id: 456 }
+    // Proceed with archiving
+});
+
+window.addEventListener('undo-archive', (e) => {
+    console.log(e.detail); // { id: 456 }
+    // Restore the item
+});
+```
+
+## Livewire integration
+
+Create undo toasts from your Livewire components:
+
+```php
+$this->dispatch('toast-undo', [
+    'title'    => 'Item deleted',
+    'event'    => 'confirm-delete',
+    'data'     => ['id' => $id],
+    'duration' => 5000,
+]);
+```
+
+Then listen for the confirmation event in JavaScript:
+
+```js
+window.addEventListener('confirm-delete', (e) => {
+    Livewire.dispatch('permanent-delete', { id: e.detail.id });
+});
+```
+
+## Use cases
+
+<CardGroup cols={2}>
+  <Card title="Soft deletes" icon="trash">
+    Give users a chance to recover deleted items before permanent deletion
+  </Card>
+  <Card title="Archive actions" icon="box-archive">
+    Allow users to undo archiving of emails, documents, or records
+  </Card>
+  <Card title="Batch operations" icon="layer-group">
+    Let users cancel bulk actions they triggered by mistake
+  </Card>
+  <Card title="Status changes" icon="arrows-rotate">
+    Provide undo for state transitions like marking items complete
+  </Card>
+</CardGroup>
+
+## Real-world example
+
+Here's a complete example with delete and undo handlers:
+
+```js
+// Trigger the undo toast
+const deleteMessage = (messageId) => {
+  toast.undo({
+    title: 'Message deleted',
+    event: 'confirm-delete',
+    undoEvent: 'undo-delete',
+    data: { id: messageId },
+    duration: 5000,
+    type: 'warning',
+  });
+};
+
+// Handle permanent deletion
+window.addEventListener('confirm-delete', async (e) => {
+  const { id } = e.detail;
+  
+  await fetch(`/api/messages/${id}`, { 
+    method: 'DELETE' 
+  });
+  
+  toast({ 
+    type: 'success', 
+    title: 'Message permanently deleted' 
+  });
+});
+
+// Handle undo
+window.addEventListener('undo-delete', (e) => {
+  toast({ 
+    type: 'info', 
+    title: 'Delete cancelled' 
+  });
+  
+  // Refresh your UI if needed
+  refreshMessages();
+});
+```
+
+## Countdown duration
+
+The default countdown is 5000ms (5 seconds). Adjust it based on your use case:
+
+- **Quick actions** — 3000ms (3 seconds)
+- **Standard deletions** — 5000ms (5 seconds)
+- **Critical operations** — 8000ms (8 seconds) or more
+
+<Warning>
+  Don't make the countdown too short. Users need enough time to read the toast and click undo if needed. We recommend at least 3 seconds.
+</Warning>
+
+## Tips
+
+- Always use the `undoEvent` option if you need to restore state when users click undo
+- Keep the title short and action-focused: "Item deleted", "Message archived"
+- Use the `warning` type (default) to grab attention
+- For Livewire, dispatch permanent actions back to your component instead of using JavaScript fetch
+- Test your undo flow thoroughly — users expect it to work perfectly

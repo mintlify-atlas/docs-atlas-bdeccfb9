@@ -1,0 +1,239 @@
+---
+title: Custom colors
+description: Override default toast type colors with custom hex values
+---
+
+Custom colors let you override the default type color for any toast. The color applies to the icon, title text, timer bars, and progress bar—perfect for branded notifications or custom visual hierarchies.
+
+## How it works
+
+Each toast type has a default color:
+
+| Type | Default color |
+|------|---------------|
+| `success` | Green |
+| `error` | Red |
+| `warning` | Amber |
+| `info` | Blue |
+| `loading` | Gray |
+
+The `color` option overrides this default with any hex color value.
+
+## Basic usage
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({ 
+      type: 'success', 
+      title: 'VIP Access Granted', 
+      color: '#8b5cf6' 
+    });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'success',
+        'title' => 'VIP Access Granted',
+        'color' => '#8b5cf6',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP Facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('VIP Access Granted', 'success')
+        ->color('#8b5cf6')
+        ->send();
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Colors must be in hex format (e.g., `#8b5cf6`). RGB, HSL, and named colors are not supported.
+</Note>
+
+## Works with all toast types
+
+Custom colors work seamlessly across all toast types and features:
+
+### Standard toasts
+
+```js
+toast({ 
+    type: 'info', 
+    title: 'Custom notification', 
+    color: '#06b6d4' 
+});
+```
+
+### Progress toasts
+
+```js
+const id = toast.progress('Syncing...', { color: '#ec4899' });
+
+toast.progress(id, 0.5);
+toast.progress(id, 1, 'Sync complete!');
+```
+
+### Undo toasts
+
+```js
+toast.undo('Archived', 'confirm-archive', { 
+    id: 1,
+    color: '#f59e0b' 
+});
+```
+
+### Persistent toasts
+
+```js
+toast({ 
+    type: 'error', 
+    title: 'Connection lost', 
+    color: '#dc2626',
+    persistent: true 
+});
+```
+
+## Common color palettes
+
+Here are some popular color choices for different notification types:
+
+### Brand colors
+
+```js
+// Purple (premium/VIP)
+toast({ type: 'success', title: 'Premium activated', color: '#8b5cf6' });
+
+// Pink (social/engagement)
+toast({ type: 'info', title: 'New follower', color: '#ec4899' });
+
+// Teal (neutral/modern)
+toast({ type: 'info', title: 'Update available', color: '#14b8a6' });
+```
+
+### Status indicators
+
+```js
+// Orange (warning alternative)
+toast({ type: 'warning', title: 'Low storage', color: '#f97316' });
+
+// Indigo (information)
+toast({ type: 'info', title: 'System notice', color: '#6366f1' });
+
+// Rose (error alternative)
+toast({ type: 'error', title: 'Failed to load', color: '#f43f5e' });
+```
+
+## Advanced examples
+
+### Branded notification system
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+// Company brand color
+GooeyToast::make('Branded notification', 'success')
+    ->color('#8b5cf6')
+    ->message('Your subscription has been upgraded to Enterprise.')
+    ->send();
+```
+
+### Custom progress toast
+
+```js
+const id = toast.progress('Processing payment...', {
+    type: 'info',
+    color: '#8b5cf6'
+});
+
+// Update progress with the same custom color
+toast.progress(id, 0.33);
+toast.progress(id, 0.66);
+toast.progress(id, 1, 'Payment successful!');
+```
+
+### Action buttons with matching colors
+
+```js
+toast({
+    type: 'info',
+    title: 'Incoming call',
+    color: '#8b5cf6',
+    persistent: true,
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept', color: '#22c55e' },
+        { label: 'Decline', icon: 'x', event: 'decline', color: '#ef4444' },
+    ],
+});
+```
+
+<Info>
+  When using action buttons with their own colors, each button can have a different color independent of the toast's main color.
+</Info>
+
+## Color best practices
+
+**Accessibility considerations:**
+
+- Ensure sufficient contrast between the color and background
+- Test colors in both light and dark themes
+- Don't rely solely on color to convey meaning
+
+**When to use custom colors:**
+
+- Branded notifications or premium features
+- Creating visual consistency with your app's design system
+- Differentiating notification categories
+- Matching colors to specific user roles or permissions
+
+**When to use default colors:**
+
+- Standard success/error/warning/info states
+- System-level notifications
+- When semantic meaning is more important than branding
+
+## Combining with avatars
+
+Custom colors work beautifully alongside avatar images:
+
+```js
+toast({
+    title: 'New message from Melissa',
+    avatar: '/avatars/melissa.jpg',
+    avatarSize: '32px',
+    message: 'Please visit HR when you get a chance 👋',
+    color: '#ec4899',
+    type: 'info',
+});
+```
+
+## PHP API reference
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+// Simple custom color
+GooeyToast::make('Title', 'success')
+    ->color('#8b5cf6')
+    ->send();
+
+// With full configuration
+GooeyToast::make('Deployment complete', 'success')
+    ->color('#22c55e')
+    ->details([
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch', 'value' => 'main'],
+    ])
+    ->footer('https://deploy.example.com/logs/123')
+    ->send();
+```
+
+## Related features
+
+- [Persistent toasts](/features/persistent-toasts) - Toasts that never auto-dismiss
+- [Avatars](/features/avatars) - Display user avatar images
+- [Action buttons](/features/action-buttons) - Add colored action buttons

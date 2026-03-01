@@ -1,0 +1,212 @@
+---
+title: Theming
+description: Switch between dark and light themes
+---
+
+Gooey Toast supports both dark and light color themes. You can set a default theme in the config file and switch themes at runtime using JavaScript.
+
+## Default theme
+
+Set the default theme in your config file:
+
+```php
+// config/gooey-toast.php
+return [
+    'theme' => 'dark', // dark or light
+];
+```
+
+<Info>
+  The theme setting affects the background colors, text colors, and overall appearance of all toasts.
+</Info>
+
+## Available themes
+
+Gooey Toast provides two built-in themes:
+
+<Tabs>
+  <Tab title="Dark theme">
+    The dark theme uses dark backgrounds with light text, ideal for applications with dark UI designs.
+
+    ```php
+    'theme' => 'dark',
+    ```
+
+    <Note>
+      Dark theme is the default if no theme is specified in the config file.
+    </Note>
+  </Tab>
+  <Tab title="Light theme">
+    The light theme uses light backgrounds with dark text, ideal for applications with light UI designs.
+
+    ```php
+    'theme' => 'light',
+    ```
+  </Tab>
+</Tabs>
+
+## Runtime theme switching
+
+You can change the theme at runtime using JavaScript, allowing users to toggle between dark and light modes:
+
+```js
+// Switch to light theme
+toast.theme('light');
+
+// Switch to dark theme
+toast.theme('dark');
+```
+
+<Info>
+  Runtime theme changes affect all existing and future toasts until the page is reloaded or the theme is changed again.
+</Info>
+
+### Toggle example
+
+Create a theme toggle button:
+
+```html
+<button onclick="toggleTheme()">
+    Toggle Theme
+</button>
+
+<script>
+let currentTheme = 'dark';
+
+function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    toast.theme(currentTheme);
+}
+</script>
+```
+
+### Persist user preference
+
+Store the user's theme preference in localStorage:
+
+```js
+// Load theme from localStorage on page load
+const savedTheme = localStorage.getItem('toast-theme') || 'dark';
+toast.theme(savedTheme);
+
+// Toggle and save theme
+function toggleTheme() {
+    const newTheme = savedTheme === 'dark' ? 'light' : 'dark';
+    toast.theme(newTheme);
+    localStorage.setItem('toast-theme', newTheme);
+}
+```
+
+## Sync with app theme
+
+If your application has its own theme system, you can sync toast themes with your app:
+
+```js
+// Listen for your app's theme change event
+window.addEventListener('theme-changed', (e) => {
+    toast.theme(e.detail.theme);
+});
+```
+
+### Tailwind CSS dark mode integration
+
+If you're using Tailwind CSS with class-based dark mode:
+
+```js
+// Detect Tailwind dark mode class
+const isDark = document.documentElement.classList.contains('dark');
+toast.theme(isDark ? 'dark' : 'light');
+
+// Watch for class changes
+const observer = new MutationObserver(() => {
+    const isDark = document.documentElement.classList.contains('dark');
+    toast.theme(isDark ? 'dark' : 'light');
+});
+
+observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+});
+```
+
+### System preference detection
+
+Match the user's system color scheme preference:
+
+```js
+// Detect system preference
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+toast.theme(prefersDark ? 'dark' : 'light');
+
+// Listen for system preference changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    toast.theme(e.matches ? 'dark' : 'light');
+});
+```
+
+## Theme behavior
+
+<Info>
+  Theme changes apply to all toasts immediately, including toasts that are already visible on the screen.
+</Info>
+
+### Important notes
+
+- Theme changes persist only for the current page session
+- After a page reload, the theme reverts to the config default unless you implement persistence (e.g., localStorage)
+- Both themes maintain the same type colors (green for success, red for error, etc.)
+- Custom colors set via the `color` option work identically in both themes
+
+## Complete theme example
+
+Here's a complete example that syncs toast theme with system preference and persists user overrides:
+
+```html
+<button id="theme-toggle">Toggle Theme</button>
+
+<script>
+// Get initial theme from localStorage or system preference
+function getInitialTheme() {
+    const saved = localStorage.getItem('toast-theme');
+    if (saved) return saved;
+    
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+}
+
+// Apply theme
+let currentTheme = getInitialTheme();
+toast.theme(currentTheme);
+
+// Toggle button
+document.getElementById('theme-toggle').addEventListener('click', () => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    toast.theme(currentTheme);
+    localStorage.setItem('toast-theme', currentTheme);
+});
+
+// Listen for system preference changes (only if no saved preference)
+if (!localStorage.getItem('toast-theme')) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        currentTheme = e.matches ? 'dark' : 'light';
+        toast.theme(currentTheme);
+    });
+}
+</script>
+```
+
+## Testing both themes
+
+Quickly test how your toasts look in both themes:
+
+```js
+// Show a toast in dark theme
+toast.theme('dark');
+toast({ type: 'success', title: 'Dark theme example' });
+
+// Switch to light theme after 3 seconds
+setTimeout(() => {
+    toast.theme('light');
+    toast({ type: 'info', title: 'Light theme example' });
+}, 3000);
+```

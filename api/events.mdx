@@ -1,0 +1,371 @@
+---
+title: Events
+description: Event system and custom events for toast notifications
+---
+
+Gooey Toast uses a custom event system built on the browser's native `CustomEvent` API. All events are dispatched on the `window` object and can be listened to with standard `addEventListener`.
+
+## Dispatching toasts
+
+You can create toasts by dispatching custom events directly, which is useful for integration with other JavaScript frameworks or when you need more control.
+
+### toast event
+
+Create a new toast notification.
+
+```js
+window.dispatchEvent(new CustomEvent('toast', {
+  detail: {
+    type: 'success',
+    title: 'Saved!',
+    message: 'Your changes have been saved.',
+  }
+}));
+```
+
+The `detail` object accepts all standard [configuration options](/api/configuration-options).
+
+### toast-update event
+
+Update an existing toast by ID.
+
+```js
+window.dispatchEvent(new CustomEvent('toast-update', {
+  detail: {
+    id: 'my-toast',
+    type: 'success',
+    title: 'Complete!',
+  }
+}));
+```
+
+The `detail` object must include an `id` property matching an existing toast, plus any options you want to update.
+
+### toast-undo event
+
+Create an undo toast with countdown.
+
+```js
+window.dispatchEvent(new CustomEvent('toast-undo', {
+  detail: {
+    title: 'Message deleted',
+    event: 'confirm-delete',
+    data: { id: 123 },
+    duration: 5000,
+  }
+}));
+```
+
+The `detail` object requires:
+- `title` (string) - Toast title
+- `event` (string) - Event to dispatch on countdown expiry
+- `data` (object) - Data to include in the event
+- `duration` (number) - Countdown duration in milliseconds
+
+Optional properties:
+- `undoEvent` (string) - Event to dispatch when user clicks undo
+- `type` (string) - Toast type (default: `warning`)
+- `icon` (string) - Custom icon
+- `color` (string) - Custom color
+- `id` (string | number) - Custom toast ID
+
+### toast-theme event
+
+Switch between dark and light themes.
+
+```js
+window.dispatchEvent(new CustomEvent('toast-theme', {
+  detail: { theme: 'light' }
+}));
+```
+
+### toast-register-icon event
+
+Register a custom icon.
+
+```js
+window.dispatchEvent(new CustomEvent('toast-register-icon', {
+  detail: {
+    name: 'star',
+    svg: '<svg viewBox="0 0 24 24">...</svg>'
+  }
+}));
+```
+
+## Listening for action events
+
+When a user clicks an action button in a toast, a custom event is dispatched with the event name you specified in the action configuration.
+
+### Basic action event
+
+```js
+toast({
+  type: 'success',
+  title: 'Message sent',
+  actions: [
+    { label: 'View', event: 'view-message', data: { id: 123 } }
+  ],
+});
+
+window.addEventListener('view-message', (e) => {
+  console.log('Message ID:', e.detail.id); // 123
+  // Navigate to message or open modal
+});
+```
+
+### Multiple actions
+
+```js
+toast({
+  type: 'info',
+  title: 'Incoming call',
+  persistent: true,
+  actions: [
+    { label: 'Accept', event: 'accept-call', data: { callerId: 456 } },
+    { label: 'Decline', event: 'decline-call', data: { callerId: 456 } },
+  ],
+});
+
+window.addEventListener('accept-call', (e) => {
+  console.log('Accepting call from:', e.detail.callerId);
+  // Handle call acceptance
+});
+
+window.addEventListener('decline-call', (e) => {
+  console.log('Declining call from:', e.detail.callerId);
+  // Handle call decline
+});
+```
+
+## Listening for undo events
+
+Undo toasts dispatch events based on user interaction:
+
+- **Confirm event** - Dispatched when the countdown expires without being undone
+- **Undo event** - Dispatched when the user clicks the undo button
+
+### Confirm event (countdown expired)
+
+```js
+toast.undo('Message deleted', 'confirm-delete', { id: 123 });
+
+window.addEventListener('confirm-delete', (e) => {
+  // User did NOT click undo, so confirm the deletion
+  fetch(`/api/messages/${e.detail.id}`, { method: 'DELETE' })
+    .then(() => console.log('Message permanently deleted'));
+});
+```
+
+### Undo event (user clicked undo)
+
+```js
+toast.undo({
+  title: 'Item archived',
+  event: 'confirm-archive',
+  undoEvent: 'undo-archive',
+  data: { id: 456 },
+});
+
+window.addEventListener('confirm-archive', (e) => {
+  // User did NOT click undo
+  console.log('Archiving item:', e.detail.id);
+  fetch(`/api/items/${e.detail.id}/archive`, { method: 'POST' });
+});
+
+window.addEventListener('undo-archive', (e) => {
+  // User clicked undo
+  console.log('Archive cancelled for item:', e.detail.id);
+  toast({ type: 'info', title: 'Archive cancelled' });
+});
+```
+
+## Event sanitization
+
+Event names are automatically sanitized to prevent injection attacks. Only the following characters are allowed:
+
+- Alphanumeric: `a-z`, `A-Z`, `0-9`
+- Special: `-`, `_`, `:`, `.`
+
+All other characters are removed from the event name.
+
+```js
+// This event name...
+event: 'my-event@#$%name'
+
+// ...becomes
+event: 'my-eventname'
+```
+
+## Event data structure
+
+All custom events dispatched by toast actions and undo toasts use the following structure:
+
+```js
+{
+  type: 'custom-event-name',
+  detail: {
+    // Your custom data object
+    id: 123,
+    foo: 'bar',
+    // ...
+  }
+}
+```
+
+Access the data in your event listener:
+
+```js
+window.addEventListener('custom-event-name', (e) => {
+  console.log(e.detail); // { id: 123, foo: 'bar', ... }
+});
+```
+
+## Livewire integration
+
+Gooey Toast integrates seamlessly with Livewire events. You can dispatch toasts from Livewire components and listen for toast action events in your components.
+
+### Dispatching from Livewire
+
+```php
+// In your Livewire component
+$this->dispatch('toast', [
+    'type'    => 'success',
+    'title'   => 'Deployment complete',
+    'details' => [
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch',      'value' => 'main'],
+    ],
+]);
+```
+
+### Listening in Livewire
+
+You can listen for toast action events in your Livewire components using Alpine.js:
+
+```html
+<div x-data="{ init() {
+    window.addEventListener('view-logs', (e) => {
+        $wire.viewLogs(e.detail.id);
+    });
+} }">
+    <!-- Your component content -->
+</div>
+```
+
+Or dispatch Livewire events from JavaScript:
+
+```js
+toast({
+  type: 'success',
+  title: 'Item saved',
+  actions: [
+    { label: 'Edit', event: 'edit-item', data: { id: 123 } }
+  ],
+});
+
+window.addEventListener('edit-item', (e) => {
+  // Dispatch to Livewire component
+  Livewire.dispatch('edit-item', { id: e.detail.id });
+});
+```
+
+## Examples
+
+<CodeGroup>
+```js Action with API call
+toast({
+  type: 'success',
+  title: 'Export ready',
+  actions: [
+    { label: 'Download', icon: 'download', event: 'download-export', data: { fileId: 789 } }
+  ],
+});
+
+window.addEventListener('download-export', async (e) => {
+  const response = await fetch(`/api/exports/${e.detail.fileId}`);
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'export.csv';
+  a.click();
+});
+```
+
+```js Undo with confirmation
+toast.undo({
+  title: 'Account will be deleted',
+  event: 'confirm-delete-account',
+  undoEvent: 'cancel-delete-account',
+  data: { userId: 42 },
+  duration: 10000,
+  type: 'error',
+});
+
+window.addEventListener('confirm-delete-account', async (e) => {
+  // Proceed with account deletion
+  await fetch(`/api/users/${e.detail.userId}`, { method: 'DELETE' });
+  toast({ type: 'success', title: 'Account deleted' });
+});
+
+window.addEventListener('cancel-delete-account', (e) => {
+  // User cancelled, show confirmation
+  toast({ type: 'info', title: 'Account deletion cancelled' });
+});
+```
+
+```js Multiple event listeners
+toast({
+  type: 'info',
+  title: 'Document shared',
+  details: [
+    { label: 'Document', value: 'Q4 Report.pdf' },
+    { label: 'Shared with', value: 'team@example.com' },
+  ],
+  actions: [
+    { label: 'Open', icon: 'external-link', event: 'open-document', data: { docId: 'doc-123' } },
+    { label: 'Copy Link', icon: 'copy', event: 'copy-link', data: { url: 'https://example.com/doc-123' } },
+    { label: 'Revoke', icon: 'x', event: 'revoke-share', data: { docId: 'doc-123' }, color: '#ef4444' },
+  ],
+});
+
+window.addEventListener('open-document', (e) => {
+  window.open(`/documents/${e.detail.docId}`, '_blank');
+});
+
+window.addEventListener('copy-link', async (e) => {
+  await navigator.clipboard.writeText(e.detail.url);
+  toast({ type: 'success', title: 'Link copied' });
+});
+
+window.addEventListener('revoke-share', async (e) => {
+  await fetch(`/api/shares/${e.detail.docId}`, { method: 'DELETE' });
+  toast({ type: 'info', title: 'Share revoked' });
+});
+```
+
+```js Direct event dispatch
+// Create toast using event
+window.dispatchEvent(new CustomEvent('toast', {
+  detail: {
+    type: 'loading',
+    title: 'Processing...',
+    id: 'process-1',
+    duration: 0,
+  }
+}));
+
+// Simulate async work
+setTimeout(() => {
+  // Update toast using event
+  window.dispatchEvent(new CustomEvent('toast-update', {
+    detail: {
+      id: 'process-1',
+      type: 'success',
+      title: 'Processing complete!',
+      duration: 5000,
+    }
+  }));
+}, 3000);
+```
+</CodeGroup>

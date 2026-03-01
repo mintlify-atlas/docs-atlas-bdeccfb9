@@ -1,0 +1,172 @@
+---
+title: Introduction
+description: A gooey expandable toast notification component for Laravel with unique SVG blob animations and rich features
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="Gooey Toast Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="Gooey Toast Hero Dark"
+/>
+
+## Overview
+
+Gooey Toast is a feature-rich toast notification component for Laravel that brings delightful animations and extensive customization to your application. Built with Alpine.js and zero external CSS dependencies, it works seamlessly with any tech stack.
+
+<Note>
+  This package is currently under active development. APIs may change before the stable release.
+</Note>
+
+## Key features
+
+Gooey Toast provides everything you need for sophisticated toast notifications:
+
+<CardGroup cols={2}>
+  <Card
+    title="Unique animations"
+    icon="sparkles"
+    href="/core/toast-types"
+  >
+    SVG gooey blob animations with per-type entrance effects including slide, shake, and bounce
+  </Card>
+  <Card
+    title="Expandable details"
+    icon="chevron-down"
+    href="/usage/javascript-api"
+  >
+    Show key-value detail rows, message blocks, and footer text in expandable toast bodies
+  </Card>
+  <Card
+    title="Action buttons"
+    icon="hand-pointer"
+    href="/features/action-buttons"
+  >
+    Add clickable buttons with custom icons, colors, and confirmation flows
+  </Card>
+  <Card
+    title="Progress tracking"
+    icon="chart-line"
+    href="/features/progress-toasts"
+  >
+    Display progress bars that update in real-time for long-running operations
+  </Card>
+  <Card
+    title="Promise integration"
+    icon="code"
+    href="/features/promise-toasts"
+  >
+    Automatically handle loading, success, and error states from JavaScript promises
+  </Card>
+  <Card
+    title="Undo functionality"
+    icon="clock-rotate-left"
+    href="/features/undo-toasts"
+  >
+    Give users a chance to undo actions with countdown timers and confirmation events
+  </Card>
+  <Card
+    title="Custom colors"
+    icon="palette"
+    href="/features/custom-colors"
+  >
+    Override type colors with custom hex values and switch between dark/light themes
+  </Card>
+  <Card
+    title="Mobile vibration"
+    icon="mobile"
+    href="/features/vibration"
+  >
+    Trigger device vibrations on mobile with custom patterns for important notifications
+  </Card>
+</CardGroup>
+
+## Framework support
+
+Gooey Toast supports modern Laravel versions and works with or without Livewire:
+
+- Laravel 10, 11, and 12
+- PHP 8.1 or higher
+- Alpine.js (included with Livewire, or add manually)
+- Optional: Livewire for enhanced integration
+
+## Toast types
+
+Each toast type comes with its own color scheme and entrance animation:
+
+| Type | Color | Animation |
+|------|-------|----------|
+| `success` | Green | Smooth slide-up |
+| `error` | Red | Slide-up with shake |
+| `warning` | Amber | Slide-up with bounce |
+| `info` | Blue | Smooth slide-up |
+| `loading` | Gray | Smooth slide-up (spinner icon) |
+
+## Quick example
+
+Here's a taste of what you can build with Gooey Toast:
+
+<CodeGroup>
+
+```javascript JavaScript
+toast({
+  type: 'success',
+  title: 'Deployment complete',
+  details: [
+    { label: 'Environment', value: 'Production' },
+    { label: 'Branch', value: 'main' },
+  ],
+  footer: 'https://deploy.example.com/logs/3f8a2c1',
+});
+```
+
+```php Livewire
+$this->dispatch('toast', [
+  'type'    => 'success',
+  'title'   => 'Deployment complete',
+  'details' => [
+    ['label' => 'Environment', 'value' => 'Production'],
+    ['label' => 'Branch',      'value' => 'main'],
+  ],
+  'footer' => 'https://deploy.example.com/logs/3f8a2c1',
+]);
+```
+
+```php PHP API
+use A89s\GooeyToast\Facades\GooeyToast;
+
+GooeyToast::make('Deployment complete', 'success')
+  ->details([
+    ['label' => 'Environment', 'value' => 'Production'],
+    ['label' => 'Branch', 'value' => 'main'],
+  ])
+  ->footer('https://deploy.example.com/logs/3f8a2c1')
+  ->send();
+```
+
+</CodeGroup>
+
+## Get started
+
+Ready to add beautiful toast notifications to your Laravel app? Start with the installation guide:
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Install Gooey Toast via Composer and add the component to your layout
+  </Card>
+  <Card
+    title="Quick start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Create your first toast notification in under 5 minutes
+  </Card>
+</CardGroup>

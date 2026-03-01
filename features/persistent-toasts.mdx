@@ -1,0 +1,189 @@
+---
+title: Persistent toasts
+description: Create toasts that never auto-dismiss
+---
+
+Persistent toasts remain visible until explicitly dismissed by the user. They're perfect for critical notifications, connection errors, or important messages that require acknowledgment.
+
+## How it works
+
+By default, toasts auto-dismiss after the configured duration. Persistent toasts override this behavior and stay on screen until:
+
+- The user clicks the close button
+- The user swipes to dismiss
+- An action button is clicked
+- The toast is programmatically removed
+
+## Basic usage
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({ 
+      type: 'error', 
+      title: 'Connection lost', 
+      persistent: true 
+    });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'       => 'error',
+        'title'      => 'Connection lost',
+        'persistent' => true,
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP Facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('Connection lost', 'error')
+        ->persistent()
+        ->send();
+    ```
+  </Tab>
+</Tabs>
+
+## Common use cases
+
+### Critical errors
+
+Use persistent toasts for errors that require immediate attention:
+
+```js
+toast({
+    type: 'error',
+    title: 'Payment failed',
+    persistent: true,
+    details: [
+        { label: 'Reason', value: 'Card declined' },
+        { label: 'Amount', value: '$49.99' },
+    ],
+    actions: [
+        { label: 'Update payment', icon: 'external-link', event: 'update-payment' },
+    ],
+});
+```
+
+### System alerts
+
+Display system-wide notifications that shouldn't disappear automatically:
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+GooeyToast::make('Maintenance scheduled', 'warning')
+    ->message('The system will be down for maintenance on Sunday at 2 AM EST.')
+    ->persistent()
+    ->send();
+```
+
+### Incoming calls or messages
+
+Create persistent toasts with action buttons for real-time events:
+
+```js
+toast({
+    type: 'info',
+    title: 'Incoming call',
+    message: 'John is calling you',
+    persistent: true,
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept', color: '#22c55e' },
+        { label: 'Decline', icon: 'x', event: 'decline', color: '#ef4444' },
+    ],
+});
+```
+
+<Note>
+  Persistent toasts don't display a timer bar since they never auto-dismiss.
+</Note>
+
+## Combining with other features
+
+### Persistent + custom colors
+
+```js
+toast({ 
+    type: 'info', 
+    title: 'VIP notification', 
+    color: '#8b5cf6',
+    persistent: true 
+});
+```
+
+### Persistent + avatar
+
+```js
+toast({
+    title: 'New message from Melissa',
+    avatar: '/avatars/melissa.jpg',
+    avatarSize: '32px',
+    message: 'Please visit HR when you get a chance 👋',
+    persistent: true,
+    type: 'info',
+});
+```
+
+### Persistent + vibration
+
+```js
+toast({
+    type: 'warning',
+    title: 'Security alert',
+    message: 'New login detected from unknown device',
+    persistent: true,
+    vibrate: [200, 100, 200],
+});
+```
+
+## Best practices
+
+<Info>
+  Use persistent toasts sparingly. Too many persistent notifications can overwhelm users and clutter the interface.
+</Info>
+
+**When to use persistent toasts:**
+
+- Critical errors that require user action
+- Connection failures or offline states
+- Incoming calls, messages, or real-time alerts
+- Important system announcements
+- Confirmation dialogs with action buttons
+
+**When NOT to use persistent toasts:**
+
+- Success confirmations ("Saved!", "Updated!")
+- Progress updates
+- Informational messages
+- Non-critical warnings
+
+## Removing persistent toasts
+
+You can programmatically dismiss a persistent toast by updating it:
+
+```js
+// Create with an ID
+toast({ 
+    id: 'connection-error',
+    type: 'error', 
+    title: 'Connection lost', 
+    persistent: true 
+});
+
+// Later, when connection is restored
+toast.update('connection-error', { 
+    type: 'success', 
+    title: 'Connected', 
+    persistent: false,
+    duration: 3000 
+});
+```
+
+## Related features
+
+- [Custom colors](/features/custom-colors) - Override toast type colors
+- [Avatars](/features/avatars) - Display user avatar images
+- [Action buttons](/features/action-buttons) - Add interactive buttons

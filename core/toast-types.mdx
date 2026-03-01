@@ -1,0 +1,263 @@
+---
+title: Toast types
+description: Learn about the five toast types and their unique animations
+---
+
+Gooey Toast provides five distinct toast types, each with its own color scheme and entrance animation to match the message context.
+
+## Overview
+
+Each toast type is designed for a specific purpose:
+
+- **Success** - Confirm successful operations
+- **Error** - Alert users to failures or problems
+- **Warning** - Display cautionary messages
+- **Info** - Show general information
+- **Loading** - Indicate ongoing processes
+
+## Success toasts
+
+Use success toasts to confirm that an operation completed successfully.
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({ type: 'success', title: 'Saved!' });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'success',
+        'title' => 'Saved!',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP API">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::success('Saved!');
+
+    // With message
+    GooeyToast::success('Saved!', 'Your changes have been saved.');
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  Success toasts use a green color scheme and feature a smooth slide-up entrance animation.
+</Info>
+
+### With details
+
+```js
+toast({
+    type: 'success',
+    title: 'Deployment complete',
+    details: [
+        { label: 'Environment', value: 'Production' },
+        { label: 'Branch', value: 'main' },
+    ],
+    footer: 'https://deploy.example.com/logs/3f8a2c1',
+});
+```
+
+## Error toasts
+
+Use error toasts to notify users of failures or critical issues.
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({ type: 'error', title: 'Upload failed' });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'error',
+        'title' => 'Upload failed',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP API">
+    ```php
+    GooeyToast::error('Upload failed');
+
+    // With message
+    GooeyToast::error('Upload failed', 'The file is too large.');
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  Error toasts use a red color scheme and feature a slide-up animation combined with a shake effect to grab attention.
+</Info>
+
+### With error details
+
+```js
+toast({
+    type: 'error',
+    title: 'Upload failed',
+    details: [
+        { label: 'File', value: 'report.pdf' },
+        { label: 'Error', value: 'File too large' },
+    ],
+    footer: 'Max file size: 10 MB',
+});
+```
+
+## Warning toasts
+
+Use warning toasts to display cautionary messages or important notices.
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({ type: 'warning', title: 'Warning message' });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'warning',
+        'title' => 'Warning message',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP API">
+    ```php
+    GooeyToast::warning('Warning message');
+
+    // With message
+    GooeyToast::warning('Warning message', 'Please review before continuing.');
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  Warning toasts use an amber color scheme and feature a slide-up animation with a bounce effect.
+</Info>
+
+### Delete confirmation example
+
+```js
+toast({
+    type: 'warning',
+    title: 'Delete account',
+    actions: [
+        { label: 'Delete', icon: 'trash', event: 'delete-account', color: '#ef4444', confirm: true },
+    ],
+});
+```
+
+## Info toasts
+
+Use info toasts to display general information or neutral messages.
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({ type: 'info', title: 'Information' });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'  => 'info',
+        'title' => 'Information',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP API">
+    ```php
+    GooeyToast::info('Information');
+
+    // With message
+    GooeyToast::info('Information', 'The system will be updated tonight.');
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  Info toasts use a blue color scheme and feature a smooth slide-up entrance animation.
+</Info>
+
+### With avatar and message
+
+```js
+toast({
+    type: 'info',
+    title: 'Melissa',
+    avatar: '/avatars/melissa.jpg',
+    message: 'Please visit HR when you get a chance 👋',
+    footer: '1h ago',
+});
+```
+
+## Loading toasts
+
+Use loading toasts to indicate that a process is in progress.
+
+```js
+toast({ type: 'loading', title: 'Processing...' });
+```
+
+<Info>
+  Loading toasts use a gray color scheme with a spinner icon and feature a smooth slide-up entrance animation.
+</Info>
+
+### Promise toasts
+
+Loading toasts are often used with promises that automatically resolve to success or error:
+
+```js
+toast.promise(fetch('/api/save'), {
+    loading: 'Saving...',
+    success: 'Saved!',
+    error: 'Failed to save',
+});
+```
+
+## Type comparison
+
+| Type | Color | Entrance animation | Use case |
+|------|-------|-------------------|----------|
+| `success` | Green | Smooth slide-up | Confirm successful operations |
+| `error` | Red | Slide-up + shake | Alert users to failures |
+| `warning` | Amber | Slide-up + bounce | Display cautionary messages |
+| `info` | Blue | Smooth slide-up | Show general information |
+| `loading` | Gray | Smooth slide-up | Indicate ongoing processes |
+
+## Custom colors
+
+You can override the default type color for any toast:
+
+```js
+toast({ type: 'success', title: 'VIP Access Granted', color: '#8b5cf6' });
+```
+
+The custom color applies to:
+- Icon color
+- Title color
+- Timer bars
+- Progress bars
+
+<Note>
+  Custom colors work with all toast types, including progress toasts and undo toasts.
+</Note>
+
+### Examples with custom colors
+
+```js
+// Custom success toast
+toast({ type: 'success', title: 'Branded notification', color: '#8b5cf6' });
+
+// Custom progress toast
+toast.progress('Syncing...', { color: '#ec4899' });
+
+// Custom persistent toast
+toast({ type: 'info', title: 'Custom', color: '#06b6d4', persistent: true });
+```

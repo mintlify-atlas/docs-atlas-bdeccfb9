@@ -1,80 +1,387 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Create your first toast notification and learn the basic patterns
 ---
 
-## Get started in three steps
+This guide will get you up and running with Gooey Toast in under 5 minutes. You'll learn how to trigger toasts using JavaScript, Livewire, and the PHP API.
 
-Get your documentation site running locally and make your first customization.
+<Note>
+  Make sure you've completed the [installation](/installation) before following this guide.
+</Note>
 
-### Step 1: Set up your local environment
+## Your first toast
+
+The simplest way to show a toast is using the `toast()` function in JavaScript:
+
+```javascript
+toast({ type: 'success', title: 'Hello, Gooey Toast!' });
+```
+
+You can test this in your browser's developer console on any page that includes the Gooey Toast component.
+
+## Toast from a button click
+
+Let's create a button that triggers a toast when clicked:
+
+```blade welcome.blade.php
+<button
+  onclick="toast({ type: 'info', title: 'Button clicked!' })"
+  class="px-4 py-2 bg-blue-500 text-white rounded"
+>
+  Click me
+</button>
+```
+
+When clicked, you'll see a blue info toast appear at the bottom of the screen.
+
+## Add details and footer
+
+Toasts can expand to show additional information. Click the toast or the chevron icon to expand:
+
+```javascript
+toast({
+  type: 'success',
+  title: 'Upload complete',
+  details: [
+    { label: 'File', value: 'report.pdf' },
+    { label: 'Size', value: '2.4 MB' },
+    { label: 'Duration', value: '3.2s' },
+  ],
+  footer: 'Uploaded to /documents/',
+});
+```
+
+<Steps>
+  <Step title="Toast appears collapsed">
+    Initially shows only the title with an icon and chevron
+  </Step>
+  
+  <Step title="User clicks to expand">
+    The toast smoothly expands with a gooey animation
+  </Step>
+  
+  <Step title="Details are revealed">
+    Shows key-value rows and footer text in the expanded body
+  </Step>
+</Steps>
+
+## Use different toast types
+
+Gooey Toast includes five built-in types, each with unique colors and animations:
+
+<CodeGroup>
+
+```javascript Success
+toast({
+  type: 'success',
+  title: 'Changes saved',
+});
+```
+
+```javascript Error
+toast({
+  type: 'error',
+  title: 'Upload failed',
+  details: [
+    { label: 'Error', value: 'File too large' },
+    { label: 'Max size', value: '10 MB' },
+  ],
+});
+```
+
+```javascript Warning
+toast({
+  type: 'warning',
+  title: 'Low disk space',
+  details: [
+    { label: 'Available', value: '2.1 GB' },
+  ],
+});
+```
+
+```javascript Info
+toast({
+  type: 'info',
+  title: 'New feature available',
+  footer: 'Click to learn more',
+});
+```
+
+```javascript Loading
+toast({
+  type: 'loading',
+  title: 'Processing...',
+  persistent: true,
+});
+```
+
+</CodeGroup>
+
+## Trigger toasts from Livewire
+
+If you're using Livewire, dispatch toasts from your components:
+
+```php app/Livewire/UserProfile.php
+namespace App\Livewire;
+
+use Livewire\Component;
+
+class UserProfile extends Component
+{
+    public function save()
+    {
+        // Save user data...
+
+        $this->dispatch('toast', [
+            'type'  => 'success',
+            'title' => 'Profile updated',
+        ]);
+    }
+}
+```
+
+With details:
+
+```php
+$this->dispatch('toast', [
+    'type'    => 'success',
+    'title'   => 'Deployment complete',
+    'details' => [
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch',      'value' => 'main'],
+        ['label' => 'Commit',      'value' => 'a3f8b2c'],
+    ],
+    'footer' => 'Deployed at ' . now()->format('H:i:s'),
+]);
+```
+
+## Use the PHP API (no Livewire required)
+
+You can trigger toasts directly from any PHP code using the `GooeyToast` facade:
+
+<Steps>
+  <Step title="Import the facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+    ```
+  </Step>
+
+  <Step title="Trigger quick toasts">
+    Use convenience methods for common types:
+
+    ```php
+    GooeyToast::success('Changes saved!');
+    GooeyToast::error('Something went wrong');
+    GooeyToast::warning('Warning message');
+    GooeyToast::info('Information');
+    ```
+  </Step>
+
+  <Step title="Build complex toasts">
+    Use the fluent builder for advanced features:
+
+    ```php
+    GooeyToast::make('Upload complete', 'success')
+        ->details([
+            ['label' => 'File', 'value' => 'report.pdf'],
+            ['label' => 'Size', 'value' => '2.4 MB'],
+        ])
+        ->footer('Uploaded to /documents/')
+        ->duration(8000)
+        ->send();
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  PHP API toasts are stored in the session and displayed on the next page load. For real-time toasts, use JavaScript or Livewire.
+</Note>
+
+## Complete example: Form submission
+
+Here's a complete example showing a Livewire form that displays different toasts based on validation results:
+
+```php app/Livewire/ContactForm.php
+namespace App\Livewire;
+
+use Livewire\Component;
+
+class ContactForm extends Component
+{
+    public $name = '';
+    public $email = '';
+    public $message = '';
+
+    public function submit()
+    {
+        $validated = $this->validate([
+            'name'    => 'required|min:2',
+            'email'   => 'required|email',
+            'message' => 'required|min:10',
+        ]);
+
+        try {
+            // Send the message...
+            
+            $this->dispatch('toast', [
+                'type'    => 'success',
+                'title'   => 'Message sent!',
+                'details' => [
+                    ['label' => 'To', 'value' => 'support@example.com'],
+                    ['label' => 'From', 'value' => $this->email],
+                ],
+                'footer' => 'We\'ll respond within 24 hours',
+            ]);
+
+            $this->reset();
+        } catch (\Exception $e) {
+            $this->dispatch('toast', [
+                'type'    => 'error',
+                'title'   => 'Failed to send message',
+                'details' => [
+                    ['label' => 'Error', 'value' => $e->getMessage()],
+                ],
+                'footer' => 'Please try again',
+            ]);
+        }
+    }
+
+    public function render()
+    {
+        return view('livewire.contact-form');
+    }
+}
+```
+
+```blade resources/views/livewire/contact-form.blade.php
+<form wire:submit="submit" class="space-y-4">
+    <div>
+        <label for="name">Name</label>
+        <input wire:model="name" type="text" id="name" />
+        @error('name') <span class="text-red-500">{{ $message }}</span> @enderror
+    </div>
+
+    <div>
+        <label for="email">Email</label>
+        <input wire:model="email" type="email" id="email" />
+        @error('email') <span class="text-red-500">{{ $message }}</span> @enderror
+    </div>
+
+    <div>
+        <label for="message">Message</label>
+        <textarea wire:model="message" id="message" rows="4"></textarea>
+        @error('message') <span class="text-red-500">{{ $message }}</span> @enderror
+    </div>
+
+    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
+        Send Message
+    </button>
+</form>
+```
+
+## Try advanced features
+
+Now that you understand the basics, explore these powerful features:
+
+<CardGroup cols={2}>
+  <Card
+    title="Action buttons"
+    icon="hand-pointer"
+    href="/features/action-buttons"
+  >
+    Add clickable buttons with custom icons and colors
+  </Card>
+  
+  <Card
+    title="Progress toasts"
+    icon="chart-line"
+    href="/features/progress-toasts"
+  >
+    Show real-time progress bars for long-running tasks
+  </Card>
+  
+  <Card
+    title="Undo functionality"
+    icon="clock-rotate-left"
+    href="/features/undo-toasts"
+  >
+    Let users undo actions with countdown timers
+  </Card>
+  
+  <Card
+    title="Promise toasts"
+    icon="code"
+    href="/features/promise-toasts"
+  >
+    Automatically handle async operations
+  </Card>
+</CardGroup>
+
+## Common patterns
+
+Here are some quick recipes for common use cases:
 
 <AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
+  <Accordion title="Show a persistent toast that never auto-dismisses">
+    ```javascript
+    toast({
+      type: 'error',
+      title: 'Connection lost',
+      persistent: true,
+    });
+    ```
   </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
+
+  <Accordion title="Display a message block instead of key-value rows">
+    ```javascript
+    toast({
+      type: 'info',
+      title: 'New message from Sarah',
+      message: 'Can you review the Q4 report when you have a chance?',
+      footer: '2 minutes ago',
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Customize the auto-dismiss duration">
+    ```javascript
+    toast({
+      type: 'success',
+      title: 'Item saved',
+      duration: 3000, // 3 seconds
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Override the default color">
+    ```javascript
+    toast({
+      type: 'success',
+      title: 'VIP access granted',
+      color: '#8b5cf6', // Purple
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Show an avatar instead of the type icon">
+    ```javascript
+    toast({
+      type: 'info',
+      title: 'Sarah Johnson',
+      avatar: '/avatars/sarah.jpg',
+      avatarSize: '32px',
+      message: 'Can you review the Q4 report?',
+    });
+    ```
   </Accordion>
 </AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+<Card
+  title="Explore all features"
+  icon="book"
+  href="/features/action-buttons"
+>
+  Dive deeper into action buttons, progress tracking, undo functionality, and more
 </Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

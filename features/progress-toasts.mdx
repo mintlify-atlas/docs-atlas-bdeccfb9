@@ -1,0 +1,150 @@
+---
+title: Progress toasts
+description: Show real-time progress updates with animated progress bars
+---
+
+Progress toasts display a visual progress bar that updates as work completes. They're perfect for file uploads, batch operations, or any task with measurable progress.
+
+## How it works
+
+When you create a progress toast, it returns a unique ID. You use that ID to update the progress value from 0 to 1. When progress reaches 1, the toast automatically switches to a success type.
+
+<Steps>
+  <Step title="Create a progress toast">
+    Call `toast.progress()` with a title to create the toast. It returns an ID for updates.
+
+    ```js
+    const id = toast.progress('Uploading photos...');
+    ```
+  </Step>
+
+  <Step title="Update the progress">
+    Pass the ID and a progress value between 0 and 1.
+
+    ```js
+    toast.progress(id, 0.25);
+    toast.progress(id, 0.5);
+    toast.progress(id, 0.75);
+    ```
+  </Step>
+
+  <Step title="Complete the operation">
+    Set progress to 1 and optionally provide a completion message.
+
+    ```js
+    toast.progress(id, 1, 'Upload complete!');
+    ```
+  </Step>
+</Steps>
+
+## Basic example
+
+Here's a complete example showing a simulated upload:
+
+```js
+// Create the progress toast
+const id = toast.progress('Uploading photos...');
+
+// Simulate progress updates
+toast.progress(id, 0.25);
+toast.progress(id, 0.5);
+toast.progress(id, 0.75);
+
+// Complete
+toast.progress(id, 1, 'Upload complete!');
+```
+
+## Custom type and color
+
+You can customize the toast type and color when creating it:
+
+```js
+const id = toast.progress('Processing...', { 
+  type: 'warning', 
+  color: '#8b5cf6' 
+});
+```
+
+<Note>
+  The progress bar inherits the toast's color, creating a cohesive visual experience.
+</Note>
+
+## Livewire integration
+
+Use Livewire events to create and update progress toasts from your backend:
+
+### Start the progress toast
+
+```php
+$this->dispatch('toast', [
+    'id'       => 'upload-1',
+    'type'     => 'info',
+    'title'    => 'Uploading...',
+    'progress' => 0,
+]);
+```
+
+### Update progress
+
+```php
+$this->dispatch('toast-update', [
+    'id'       => 'upload-1',
+    'progress' => 0.5,
+]);
+```
+
+### Complete the operation
+
+```php
+$this->dispatch('toast-update', [
+    'id'       => 'upload-1',
+    'progress' => 1,
+    'type'     => 'success',
+    'title'    => 'Uploaded!',
+]);
+```
+
+## Real-world example
+
+Here's a practical example with a file upload:
+
+```js
+const uploadFile = async (file) => {
+  const id = toast.progress(`Uploading ${file.name}...`);
+  
+  const xhr = new XMLHttpRequest();
+  
+  xhr.upload.addEventListener('progress', (e) => {
+    if (e.lengthComputable) {
+      const progress = e.loaded / e.total;
+      toast.progress(id, progress);
+    }
+  });
+  
+  xhr.addEventListener('load', () => {
+    toast.progress(id, 1, 'Upload complete!');
+  });
+  
+  xhr.open('POST', '/api/upload');
+  xhr.send(file);
+};
+```
+
+<Warning>
+  Always ensure your progress values stay between 0 and 1. Values outside this range may cause unexpected behavior.
+</Warning>
+
+## Progress values
+
+- **0** — No progress (0%)
+- **0.25** — Quarter complete (25%)
+- **0.5** — Half complete (50%)
+- **0.75** — Three-quarters complete (75%)
+- **1** — Complete (100%) — auto-switches to success type
+
+## Tips
+
+- Use a meaningful ID string (like `upload-1`) instead of relying on the auto-generated ID for better tracking
+- Provide a completion message when reaching 100% to give users clear feedback
+- Combine with custom colors to match your brand or indicate operation type
+- For Livewire apps, update progress on the backend as your operation progresses

@@ -1,0 +1,397 @@
+---
+title: Configuration options
+description: Complete reference for all toast configuration options
+---
+
+All configuration options that can be passed to `toast()` or other toast methods.
+
+## Basic options
+
+<ParamField path="type" type="string" default="success">
+  The toast type determines the icon, color, and entrance animation.
+  
+  Options:
+  - `success` - Green color, smooth slide-up animation
+  - `error` - Red color, slide-up with shake animation
+  - `warning` - Amber color, slide-up with bounce animation
+  - `info` - Blue color, smooth slide-up animation
+  - `loading` - Gray color, spinner icon, smooth slide-up animation
+  
+  ```js
+  toast({ type: 'error', title: 'Something went wrong' });
+  ```
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The main text displayed in the toast. This is the only required option.
+  
+  ```js
+  toast({ title: 'Notification' });
+  ```
+</ParamField>
+
+<ParamField path="id" type="string | number">
+  Optional unique identifier for the toast. Use this when you need to update the toast later with `toast.update()`.
+  
+  If not provided, a unique ID is generated automatically using `Date.now() + Math.random()`.
+  
+  ```js
+  toast({ id: 'my-toast', title: 'Processing...' });
+  
+  // Update later
+  toast.update('my-toast', { title: 'Complete!' });
+  ```
+</ParamField>
+
+## Content options
+
+<ParamField path="message" type="string">
+  Plain text message block displayed in the expanded body. Unlike `details` (key-value rows), `message` renders as a natural paragraph ideal for chat notifications, alerts, or any freeform content.
+  
+  ```js
+  toast({
+    type: 'info',
+    title: 'Melissa',
+    message: 'Please visit HR when you get a chance 👋',
+    footer: '1h ago',
+  });
+  ```
+</ParamField>
+
+<ParamField path="details" type="array">
+  Array of label-value pairs displayed as expandable rows. Each detail object should have a `label` and `value` property.
+  
+  The details section appears when the user clicks on the toast to expand it.
+  
+  ```js
+  toast({
+    type: 'success',
+    title: 'Deployment complete',
+    details: [
+      { label: 'Environment', value: 'Production' },
+      { label: 'Branch', value: 'main' },
+      { label: 'Duration', value: '2m 34s' },
+    ],
+  });
+  ```
+</ParamField>
+
+<ParamField path="footer" type="string">
+  Footer text displayed at the bottom of the expanded body. Useful for timestamps, URLs, or additional context.
+  
+  ```js
+  toast({
+    type: 'success',
+    title: 'Deployment complete',
+    footer: 'https://deploy.example.com/logs/3f8a2c1',
+  });
+  ```
+</ParamField>
+
+<ParamField path="actions" type="array">
+  Array of action button objects displayed in the expanded toast body. Each button dispatches a custom window event and dismisses the toast.
+  
+  When there are 2+ buttons, they display side by side. A single button stays full width.
+  
+  Each action object can have:
+  - `label` (string, required) - Button text
+  - `event` (string, required) - Event name to dispatch
+  - `data` (object) - Data to include in event detail
+  - `icon` (string) - Icon name from available icons
+  - `color` (string) - Custom button color (hex, rgb, etc.)
+  - `confirm` (boolean) - Require two-step confirmation
+  
+  ```js
+  toast({
+    type: 'success',
+    title: 'Message sent',
+    actions: [
+      { label: 'Undo', icon: 'undo', event: 'undo-send' },
+      { label: 'View', icon: 'external-link', event: 'view-message', data: { id: 123 } },
+    ],
+  });
+  
+  window.addEventListener('view-message', (e) => {
+    console.log(e.detail); // { id: 123 }
+  });
+  ```
+</ParamField>
+
+## Appearance options
+
+<ParamField path="color" type="string">
+  Custom color to override the default type color. Applies to the icon, title, timer bars, and progress bar.
+  
+  Accepts any valid CSS color: hex, rgb, rgba, hsl, color names, etc.
+  
+  ```js
+  toast({
+    type: 'success',
+    title: 'VIP Access Granted',
+    color: '#8b5cf6'
+  });
+  ```
+</ParamField>
+
+<ParamField path="icon" type="string">
+  Override the default type icon with a registered icon name. Use `toast.registerIcon()` to register custom icons.
+  
+  Built-in icons: `success`, `error`, `warning`, `info`, `loading`
+  
+  ```js
+  toast.registerIcon('star', '<svg viewBox="0 0 24 24">...</svg>');
+  
+  toast({ type: 'success', title: 'Favorited!', icon: 'star' });
+  ```
+</ParamField>
+
+<ParamField path="avatar" type="string">
+  URL to an avatar image. When set, displays the image instead of the type icon. Perfect for user notifications or chat messages.
+  
+  ```js
+  toast({
+    title: 'New message from John',
+    avatar: '/avatars/john.jpg',
+    type: 'info'
+  });
+  ```
+</ParamField>
+
+<ParamField path="avatarSize" type="string" default="18px">
+  Custom avatar size. Accepts any CSS size unit: px, rem, em, etc.
+  
+  ```js
+  toast({
+    title: 'Welcome back!',
+    avatar: '/avatars/user.png',
+    avatarSize: '32px',
+    type: 'success'
+  });
+  ```
+</ParamField>
+
+<ParamField path="progress" type="number">
+  Progress value between 0 and 1. When set, displays a progress bar in the toast.
+  
+  Values are automatically clamped between 0 and 1.
+  
+  ```js
+  toast({
+    type: 'info',
+    title: 'Uploading...',
+    progress: 0.5,
+    duration: 0
+  });
+  ```
+</ParamField>
+
+## Timing options
+
+<ParamField path="duration" type="number" default="5000">
+  Auto-dismiss duration in milliseconds. Set to `0` to disable auto-dismiss (same as `persistent: true`).
+  
+  The default value is set in your config file (`config/gooey-toast.php`).
+  
+  ```js
+  toast({
+    type: 'info',
+    title: 'Quick notification',
+    duration: 3000
+  });
+  ```
+</ParamField>
+
+<ParamField path="persistent" type="boolean" default="false">
+  When `true`, the toast never auto-dismisses. Only removed by the close button, an action button, or swipe gesture.
+  
+  Persistent toasts are useful for important messages that require user acknowledgment.
+  
+  ```js
+  toast({
+    type: 'error',
+    title: 'Connection lost',
+    persistent: true
+  });
+  ```
+</ParamField>
+
+## Interaction options
+
+<ParamField path="vibrate" type="boolean | array">
+  Enable device vibration (mobile only) when the toast appears. Uses the [Vibration API](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API) and is silently ignored on desktop browsers.
+  
+  - `true` - Default 200ms vibration
+  - Array - Custom vibration pattern `[vibrate, pause, vibrate, ...]`
+  
+  ```js
+  // Simple vibration
+  toast({ type: 'info', title: 'Alert!', vibrate: true });
+  
+  // Custom pattern: vibrate 200ms, pause 100ms, vibrate 200ms
+  toast({ type: 'info', title: 'Incoming call', vibrate: [200, 100, 200] });
+  ```
+</ParamField>
+
+## Actions
+
+Action buttons are interactive elements in the expanded toast body. Each action can be configured with the following options:
+
+### Action button properties
+
+<ParamField path="label" type="string" required>
+  Button text displayed to the user
+</ParamField>
+
+<ParamField path="event" type="string" required>
+  Event name to dispatch when the button is clicked. A custom event is dispatched on the `window` object with this name.
+  
+  Event names are automatically sanitized to only include alphanumeric characters, hyphens, underscores, colons, and periods.
+  
+  ```js
+  actions: [
+    { label: 'View', event: 'view-message', data: { id: 123 } }
+  ]
+  
+  window.addEventListener('view-message', (e) => {
+    console.log(e.detail.id); // 123
+  });
+  ```
+</ParamField>
+
+<ParamField path="data" type="object" default="{}">
+  Data to include in the event detail. Accessible via `event.detail` in your event listener.
+  
+  ```js
+  actions: [
+    { label: 'Delete', event: 'delete-item', data: { id: 456, type: 'message' } }
+  ]
+  ```
+</ParamField>
+
+<ParamField path="icon" type="string">
+  Icon name to display in the button. Must be one of the available action icons.
+  
+  Available icons:
+  - `external-link`
+  - `eye`
+  - `undo`
+  - `retry`
+  - `reply`
+  - `map-pin`
+  - `download`
+  - `copy`
+  - `trash`
+  - `check`
+  - `x`
+  - `image`
+  
+  You can also use custom icons registered with `toast.registerIcon()`.
+  
+  ```js
+  actions: [
+    { label: 'Undo', icon: 'undo', event: 'undo-send' }
+  ]
+  ```
+</ParamField>
+
+<ParamField path="color" type="string">
+  Custom color for the button. The button gets a tinted background and colored text.
+  
+  Accepts any valid CSS color: hex, rgb, rgba, hsl, color names, etc.
+  
+  ```js
+  toast({
+    type: 'info',
+    title: 'Incoming call',
+    persistent: true,
+    actions: [
+      { label: 'Accept', icon: 'check', event: 'accept', color: '#22c55e' },
+      { label: 'Decline', icon: 'x', event: 'decline', color: '#ef4444' },
+    ],
+  });
+  ```
+</ParamField>
+
+<ParamField path="confirm" type="boolean" default="false">
+  Require two-step confirmation before firing the event. The first click changes the label to "Sure?" for 3 seconds. If clicked again within that time, the event fires. If not clicked, the label reverts to the original.
+  
+  Useful for destructive actions like delete or archive.
+  
+  ```js
+  actions: [
+    { label: 'Delete', icon: 'trash', event: 'delete-account', color: '#ef4444', confirm: true }
+  ]
+  ```
+</ParamField>
+
+## Default type colors
+
+Each toast type has a default color that can be overridden with the `color` option:
+
+- `success`: `#22c55e` (green)
+- `error`: `#ef4444` (red)
+- `warning`: `#f59e0b` (amber)
+- `info`: `#3b82f6` (blue)
+- `loading`: `#888` (gray)
+
+## Examples
+
+<CodeGroup>
+```js Complete example
+toast({
+  type: 'success',
+  title: 'Deployment complete',
+  id: 'deploy-123',
+  message: 'Your application has been successfully deployed to production.',
+  avatar: '/avatars/system.png',
+  avatarSize: '24px',
+  details: [
+    { label: 'Environment', value: 'Production' },
+    { label: 'Branch', value: 'main' },
+    { label: 'Duration', value: '2m 34s' },
+  ],
+  footer: 'https://deploy.example.com/logs/3f8a2c1',
+  actions: [
+    { label: 'View Logs', icon: 'external-link', event: 'view-logs', data: { id: 123 } },
+    { label: 'Rollback', icon: 'undo', event: 'rollback', color: '#ef4444', confirm: true },
+  ],
+  duration: 8000,
+  color: '#8b5cf6',
+  vibrate: [100, 50, 100],
+});
+```
+
+```js Chat notification
+toast({
+  type: 'info',
+  title: 'Sarah Johnson',
+  avatar: '/avatars/sarah.jpg',
+  avatarSize: '28px',
+  message: 'Can you review the latest design mockups when you get a chance?',
+  footer: '2 minutes ago',
+  actions: [
+    { label: 'Reply', icon: 'reply', event: 'open-chat', data: { userId: 42 } },
+    { label: 'Mark Read', icon: 'check', event: 'mark-read', data: { messageId: 789 } },
+  ],
+  duration: 10000,
+});
+```
+
+```js Error with details
+toast({
+  type: 'error',
+  title: 'Payment failed',
+  persistent: true,
+  details: [
+    { label: 'Card', value: '•••• 4242' },
+    { label: 'Reason', value: 'Insufficient funds' },
+    { label: 'Amount', value: '$249.99' },
+  ],
+  actions: [
+    { label: 'Update Payment', icon: 'retry', event: 'update-payment', color: '#3b82f6' },
+    { label: 'Contact Support', icon: 'external-link', event: 'contact-support' },
+  ],
+  vibrate: [200, 100, 200],
+});
+```
+</CodeGroup>

@@ -1,0 +1,331 @@
+---
+title: Vibration
+description: Trigger mobile device vibration when toasts appear
+---
+
+The vibration feature uses the [Vibration API](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API) to provide haptic feedback when toasts appear. It's perfect for mobile notifications, urgent alerts, or drawing attention to important messages.
+
+## How it works
+
+When a toast with vibration enabled appears, compatible devices will vibrate according to the specified pattern. The feature is silently ignored on:
+
+- Desktop browsers
+- Browsers that don't support the Vibration API
+- Devices where vibration is disabled by user settings
+
+<Note>
+  Vibration only works on mobile devices with haptic feedback support and when the user has granted permission.
+</Note>
+
+## Basic usage
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    // Simple vibration (200ms)
+    toast({ 
+      type: 'info', 
+      title: 'Alert!', 
+      vibrate: true 
+    });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'    => 'info',
+        'title'   => 'Alert!',
+        'vibrate' => true,
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP Facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('Alert!', 'info')
+        ->vibrate(true)
+        ->send();
+    ```
+  </Tab>
+</Tabs>
+
+## Custom vibration patterns
+
+Create custom patterns with an array of millisecond values. The pattern alternates between vibrate and pause:
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    // Pattern: vibrate 200ms, pause 100ms, vibrate 200ms
+    toast({ 
+      type: 'info', 
+      title: 'Incoming call', 
+      vibrate: [200, 100, 200] 
+    });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'type'    => 'info',
+        'title'   => 'Incoming call',
+        'vibrate' => [200, 100, 200],
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP Facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('Incoming call', 'info')
+        ->vibrate([200, 100, 200])
+        ->send();
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  Vibration patterns are arrays where odd indices (1st, 3rd, 5th) are vibration durations and even indices (2nd, 4th) are pause durations.
+</Info>
+
+## Common patterns
+
+Here are some useful vibration patterns for different notification types:
+
+### Single tap (default)
+
+```js
+toast({ type: 'info', title: 'Message', vibrate: true });
+// or
+toast({ type: 'info', title: 'Message', vibrate: [200] });
+```
+
+### Double tap
+
+```js
+toast({ 
+    type: 'warning', 
+    title: 'Important notice', 
+    vibrate: [100, 50, 100] 
+});
+```
+
+### Triple tap
+
+```js
+toast({ 
+    type: 'error', 
+    title: 'Critical alert', 
+    vibrate: [100, 50, 100, 50, 100] 
+});
+```
+
+### Long pulse
+
+```js
+toast({ 
+    type: 'success', 
+    title: 'Task complete', 
+    vibrate: [400] 
+});
+```
+
+### Heartbeat pattern
+
+```js
+toast({ 
+    type: 'info', 
+    title: 'Incoming call', 
+    vibrate: [200, 100, 200, 100, 200] 
+});
+```
+
+### Alert pattern
+
+```js
+toast({ 
+    type: 'error', 
+    title: 'Security warning', 
+    vibrate: [300, 200, 300, 200, 300] 
+});
+```
+
+## Use cases
+
+### Incoming messages
+
+```js
+toast({
+    title: 'New message from Emma',
+    avatar: '/avatars/emma.jpg',
+    avatarSize: '32px',
+    message: 'Are you available for a quick call?',
+    vibrate: [200, 100, 200],
+    type: 'info',
+});
+```
+
+### Critical errors
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+GooeyToast::make('Connection lost', 'error')
+    ->message('Unable to reach the server. Please check your internet connection.')
+    ->vibrate([100, 50, 100, 50, 100])
+    ->persistent()
+    ->send();
+```
+
+### Security alerts
+
+```js
+toast({
+    type: 'warning',
+    title: 'Security alert',
+    message: 'New login detected from unknown device',
+    persistent: true,
+    vibrate: [300, 200, 300],
+    actions: [
+        { label: 'Verify', icon: 'check', event: 'verify-login' },
+        { label: 'Block', icon: 'x', event: 'block-device', color: '#ef4444' },
+    ],
+});
+```
+
+### Incoming calls
+
+```js
+toast({
+    title: 'Incoming call from Mike',
+    avatar: '/avatars/mike.jpg',
+    avatarSize: '40px',
+    persistent: true,
+    vibrate: [200, 100, 200, 100, 200, 100, 200],
+    type: 'info',
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept', color: '#22c55e' },
+        { label: 'Decline', icon: 'x', event: 'decline', color: '#ef4444' },
+    ],
+});
+```
+
+## Combining with other features
+
+### Vibration + persistent toasts
+
+```js
+toast({
+    type: 'error',
+    title: 'Payment failed',
+    message: 'Your card was declined. Please update your payment method.',
+    vibrate: [200, 100, 200],
+    persistent: true,
+});
+```
+
+### Vibration + custom colors
+
+```js
+toast({
+    type: 'warning',
+    title: 'Low battery',
+    message: 'Device battery is at 10%. Please charge soon.',
+    color: '#f59e0b',
+    vibrate: [100, 50, 100],
+});
+```
+
+### Vibration + avatars
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+GooeyToast::make('New message from Sarah', 'info')
+    ->avatar('/avatars/sarah.jpg')
+    ->avatarSize('32px')
+    ->message('Can you review my pull request?')
+    ->vibrate([200, 100, 200])
+    ->send();
+```
+
+## Best practices
+
+<Info>
+  Use vibration sparingly. Excessive vibrations can be annoying and drain battery life.
+</Info>
+
+**When to use vibration:**
+
+- Incoming calls or messages
+- Time-sensitive alerts
+- Critical errors or security warnings
+- Notifications that require immediate attention
+- Background task completion (when app is not visible)
+
+**When NOT to use vibration:**
+
+- Success confirmations ("Saved!", "Updated!")
+- Informational messages
+- Progress updates
+- Non-urgent notifications
+- Toasts that appear frequently
+
+**Pattern guidelines:**
+
+- Keep patterns short (under 1 second total)
+- Use 2-3 vibrations maximum
+- Maintain consistent patterns for similar notification types
+- Test on real devices—patterns feel different than they look
+
+**Accessibility considerations:**
+
+- Don't rely solely on vibration to convey information
+- Provide visual and audio alternatives
+- Respect user preferences and system settings
+- Consider users with motor impairments who may not perceive vibrations
+
+## Browser support
+
+The Vibration API is supported on:
+
+- Chrome for Android
+- Firefox for Android
+- Samsung Internet
+- Edge mobile
+
+Not supported on:
+
+- iOS Safari (Apple devices don't allow web vibration)
+- Desktop browsers
+- Older mobile browsers
+
+<Note>
+  Always test vibration patterns on actual devices. Emulators don't accurately simulate haptic feedback.
+</Note>
+
+## Full example
+
+```js
+toast({
+    type: 'info',
+    title: 'Incoming call',
+    avatar: '/avatars/caller.jpg',
+    avatarSize: '40px',
+    message: 'John is calling you',
+    vibrate: [200, 100, 200, 100, 200],
+    persistent: true,
+    color: '#8b5cf6',
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept-call', color: '#22c55e' },
+        { label: 'Decline', icon: 'x', event: 'decline-call', color: '#ef4444' },
+    ],
+});
+```
+
+## Related features
+
+- [Persistent toasts](/features/persistent-toasts) - Toasts that never auto-dismiss
+- [Avatars](/features/avatars) - Display user avatar images
+- [Custom colors](/features/custom-colors) - Override toast type colors

@@ -1,0 +1,275 @@
+---
+title: Avatars
+description: Display user avatar images in toast notifications
+---
+
+Avatars replace the default type icon with a user image, perfect for chat notifications, mentions, social interactions, or any user-centric alerts.
+
+## How it works
+
+When you provide an `avatar` URL, the toast displays the image instead of the default type icon (checkmark, error symbol, etc.). The avatar is rendered as a circular image with proper sizing and fallback handling.
+
+## Basic usage
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({
+        title: 'New message from John',
+        avatar: '/avatars/john.jpg',
+        type: 'info'
+    });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'title'  => 'New message from John',
+        'avatar' => '/avatars/john.jpg',
+        'type'   => 'info',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP Facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('New message from John', 'info')
+        ->avatar('/avatars/john.jpg')
+        ->send();
+    ```
+  </Tab>
+</Tabs>
+
+## Custom avatar size
+
+The default avatar size is `18px`. You can override this with any CSS unit:
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```js
+    toast({
+        title: 'Welcome back!',
+        avatar: '/avatars/user.png',
+        avatarSize: '32px',
+        type: 'success'
+    });
+    ```
+  </Tab>
+  <Tab title="Livewire">
+    ```php
+    $this->dispatch('toast', [
+        'title'      => 'Welcome back!',
+        'avatar'     => '/avatars/user.png',
+        'avatarSize' => '32px',
+        'type'       => 'success',
+    ]);
+    ```
+  </Tab>
+  <Tab title="PHP Facade">
+    ```php
+    use A89s\GooeyToast\Facades\GooeyToast;
+
+    GooeyToast::make('Welcome back!', 'success')
+        ->avatar('/avatars/user.png')
+        ->avatarSize('32px')
+        ->send();
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Avatar sizes can use any CSS unit: `px`, `rem`, `em`, etc. The most common sizes are between `18px` and `48px`.
+</Note>
+
+## Common use cases
+
+### Chat notifications
+
+Display incoming messages with the sender's avatar:
+
+```js
+toast({
+    type: 'info',
+    title: 'Melissa',
+    avatar: '/avatars/melissa.jpg',
+    avatarSize: '32px',
+    message: 'Please visit HR when you get a chance 👋',
+    footer: '1h ago',
+});
+```
+
+### Social interactions
+
+Notify users of likes, follows, or mentions:
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+GooeyToast::make('@john mentioned you', 'info')
+    ->avatar('/avatars/john.jpg')
+    ->avatarSize('28px')
+    ->message('"Great work on the new feature!"')
+    ->footer('in #general')
+    ->send();
+```
+
+### Team notifications
+
+Show activity from team members:
+
+```js
+toast({
+    title: 'Sarah reviewed your PR',
+    avatar: '/avatars/sarah.jpg',
+    type: 'success',
+    details: [
+        { label: 'Pull Request', value: '#123: Add user search' },
+        { label: 'Status', value: 'Approved' },
+    ],
+    actions: [
+        { label: 'View', icon: 'external-link', event: 'view-pr', data: { id: 123 } },
+    ],
+});
+```
+
+## Combining with other features
+
+### Avatar + custom colors
+
+```js
+toast({
+    title: 'VIP message',
+    avatar: '/avatars/vip-user.jpg',
+    avatarSize: '32px',
+    color: '#8b5cf6',
+    message: 'Your exclusive content is ready',
+    type: 'info',
+});
+```
+
+### Avatar + persistent toasts
+
+```js
+toast({
+    title: 'Incoming call from Mike',
+    avatar: '/avatars/mike.jpg',
+    avatarSize: '40px',
+    persistent: true,
+    type: 'info',
+    actions: [
+        { label: 'Accept', icon: 'check', event: 'accept', color: '#22c55e' },
+        { label: 'Decline', icon: 'x', event: 'decline', color: '#ef4444' },
+    ],
+});
+```
+
+### Avatar + vibration
+
+```js
+toast({
+    title: 'New message from Emma',
+    avatar: '/avatars/emma.jpg',
+    message: 'Are you available for a quick call?',
+    vibrate: [200, 100, 200],
+    type: 'info',
+});
+```
+
+## Avatar paths
+
+You can use various URL formats for avatars:
+
+```js
+// Relative path
+toast({ title: 'User', avatar: '/avatars/user.jpg', type: 'info' });
+
+// Absolute URL
+toast({ title: 'User', avatar: 'https://example.com/avatars/user.jpg', type: 'info' });
+
+// CDN or external service
+toast({ title: 'User', avatar: 'https://cdn.example.com/user-123.jpg', type: 'info' });
+
+// Gravatar
+const hash = 'a1b2c3d4e5f6...';
+toast({ 
+    title: 'User', 
+    avatar: `https://gravatar.com/avatar/${hash}?s=64`, 
+    type: 'info' 
+});
+```
+
+## Recommended sizes
+
+Choose avatar sizes based on the notification importance:
+
+| Size | Use case |
+|------|----------|
+| `18px` | Default size, minimal notifications |
+| `24px` | Standard notifications |
+| `28px` | Mentions, replies |
+| `32px` | Direct messages, important alerts |
+| `40px` | Incoming calls, priority notifications |
+| `48px` | Full-screen modal toasts (rare) |
+
+<Info>
+  Larger avatars (32px+) work best with persistent toasts or notifications that include actions or detailed content.
+</Info>
+
+## Full example with all options
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+
+GooeyToast::make('Melissa', 'info')
+    ->avatar('/avatars/melissa.jpg')
+    ->avatarSize('32px')
+    ->message('Please visit HR when you get a chance 👋')
+    ->footer('1h ago')
+    ->duration(8000)
+    ->send();
+```
+
+In JavaScript:
+
+```js
+toast({
+    type: 'info',
+    title: 'Melissa',
+    avatar: '/avatars/melissa.jpg',
+    avatarSize: '32px',
+    message: 'Please visit HR when you get a chance 👋',
+    footer: '1h ago',
+    duration: 8000,
+    actions: [
+        { label: 'Reply', icon: 'reply', event: 'reply-message' },
+    ],
+});
+```
+
+## Best practices
+
+**Image requirements:**
+
+- Use square images for best results
+- Optimize images to reduce file size (< 50KB recommended)
+- Serve images from a CDN for faster loading
+- Provide proper fallbacks if images fail to load
+
+**Accessibility:**
+
+- Include meaningful titles that identify the user
+- Don't rely solely on avatars to convey information
+- Ensure avatar images have proper contrast
+
+**Performance:**
+
+- Lazy load avatars if displaying many toasts
+- Cache avatar images in the browser
+- Consider using a service like Gravatar for consistent avatars
+
+## Related features
+
+- [Custom colors](/features/custom-colors) - Override toast type colors
+- [Persistent toasts](/features/persistent-toasts) - Toasts that never auto-dismiss
+- [Vibration](/features/vibration) - Mobile vibration for notifications

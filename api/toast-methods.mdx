@@ -1,0 +1,505 @@
+---
+title: Toast methods
+description: JavaScript methods for creating and managing toast notifications
+---
+
+## toast()
+
+Create a toast notification with custom options.
+
+```js
+toast({ type: 'success', title: 'Saved!' });
+```
+
+<ParamField path="type" type="string" default="success">
+  The toast type. One of: `success`, `error`, `warning`, `info`, `loading`
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="id" type="string | number">
+  Optional unique identifier for the toast. Use this to update the toast later
+</ParamField>
+
+<ParamField path="message" type="string">
+  Plain text message block displayed in the expanded body
+</ParamField>
+
+<ParamField path="details" type="array">
+  Array of label-value pairs displayed as expandable rows
+  
+  ```js
+  details: [
+    { label: 'File', value: 'report.pdf' },
+    { label: 'Error', value: 'File too large' },
+  ]
+  ```
+</ParamField>
+
+<ParamField path="footer" type="string">
+  Footer text displayed at the bottom of the expanded body
+</ParamField>
+
+<ParamField path="actions" type="array">
+  Array of action button objects. See [Configuration options](/api/configuration-options#actions) for details
+</ParamField>
+
+<ParamField path="duration" type="number" default="5000">
+  Auto-dismiss duration in milliseconds. Set to `0` to disable auto-dismiss
+</ParamField>
+
+<ParamField path="persistent" type="boolean" default="false">
+  When `true`, the toast never auto-dismisses. Only removed by close button, action button, or swipe
+</ParamField>
+
+<ParamField path="color" type="string">
+  Custom color to override the default type color. Accepts any valid CSS color (hex, rgb, etc.)
+  
+  ```js
+  toast({ type: 'success', title: 'VIP Access', color: '#8b5cf6' });
+  ```
+</ParamField>
+
+<ParamField path="progress" type="number">
+  Progress value between 0 and 1. Displays a progress bar in the toast
+</ParamField>
+
+<ParamField path="icon" type="string">
+  Override the default type icon with a registered icon name
+</ParamField>
+
+<ParamField path="avatar" type="string">
+  URL to an avatar image. When set, displays the image instead of the type icon
+  
+  ```js
+  toast({
+    title: 'New message from John',
+    avatar: '/avatars/john.jpg',
+    type: 'info'
+  });
+  ```
+</ParamField>
+
+<ParamField path="avatarSize" type="string" default="18px">
+  Custom avatar size. Accepts any CSS size unit
+  
+  ```js
+  toast({
+    title: 'Welcome back!',
+    avatar: '/avatars/user.png',
+    avatarSize: '32px',
+    type: 'success'
+  });
+  ```
+</ParamField>
+
+<ParamField path="vibrate" type="boolean | array">
+  Enable device vibration (mobile only). Pass `true` for a default 200ms vibration, or an array for a custom pattern
+  
+  ```js
+  // Simple vibration
+  toast({ type: 'info', title: 'Alert!', vibrate: true });
+  
+  // Custom pattern: vibrate 200ms, pause 100ms, vibrate 200ms
+  toast({ type: 'info', title: 'Incoming call', vibrate: [200, 100, 200] });
+  ```
+</ParamField>
+
+### Examples
+
+<CodeGroup>
+```js Simple toast
+toast({ type: 'success', title: 'Saved!' });
+```
+
+```js With details
+toast({
+  type: 'error',
+  title: 'Upload failed',
+  details: [
+    { label: 'File', value: 'report.pdf' },
+    { label: 'Error', value: 'File too large' },
+  ],
+  footer: 'Max file size: 10 MB',
+});
+```
+
+```js With message
+toast({
+  type: 'info',
+  title: 'Melissa',
+  avatar: '/avatars/melissa.jpg',
+  message: 'Please visit HR when you get a chance 👋',
+  footer: '1h ago',
+});
+```
+
+```js Persistent toast
+toast({
+  type: 'error',
+  title: 'Connection lost',
+  persistent: true
+});
+```
+
+```js Custom color
+toast({
+  type: 'success',
+  title: 'VIP Access Granted',
+  color: '#8b5cf6'
+});
+```
+</CodeGroup>
+
+## toast.progress()
+
+Create or update a progress toast with a visual progress bar.
+
+### Create a progress toast
+
+```js
+const id = toast.progress('Uploading photos...');
+```
+
+Returns the toast ID for subsequent updates.
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="options" type="object">
+  Optional configuration object
+  
+  ```js
+  const id = toast.progress('Processing...', {
+    type: 'warning',
+    color: '#8b5cf6'
+  });
+  ```
+  
+  Supports all standard toast options: `type`, `color`, `icon`, etc.
+</ParamField>
+
+### Update progress
+
+```js
+toast.progress(id, 0.5);
+```
+
+<ParamField path="id" type="string | number" required>
+  The toast ID returned when creating the progress toast
+</ParamField>
+
+<ParamField path="value" type="number" required>
+  Progress value between 0 and 1
+</ParamField>
+
+<ParamField path="titleOrOptions" type="string | object">
+  Optional title string or options object to update the toast
+  
+  ```js
+  // Update title on completion
+  toast.progress(id, 1, 'Upload complete!');
+  
+  // Update with options
+  toast.progress(id, 1, { title: 'Done!', type: 'success' });
+  ```
+</ParamField>
+
+### Examples
+
+<CodeGroup>
+```js Basic progress
+const id = toast.progress('Uploading photos...');
+
+// Update progress
+toast.progress(id, 0.25);
+toast.progress(id, 0.5);
+toast.progress(id, 0.75);
+
+// Complete (auto-switches to success type)
+toast.progress(id, 1, 'Upload complete!');
+```
+
+```js With options
+const id = toast.progress('Processing...', {
+  type: 'warning',
+  color: '#8b5cf6'
+});
+
+toast.progress(id, 0.5);
+toast.progress(id, 1, 'Processing complete!');
+```
+</CodeGroup>
+
+## toast.undo()
+
+Create an undo toast with a countdown timer and undo button. If the user doesn't click undo, a confirm event fires when the countdown expires.
+
+### Simple undo toast
+
+```js
+toast.undo('Message deleted', 'confirm-delete', { id: 123 });
+
+window.addEventListener('confirm-delete', (e) => {
+  fetch(`/api/messages/${e.detail.id}`, { method: 'DELETE' });
+});
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="event" type="string" required>
+  Event name to dispatch when countdown expires (if not undone)
+</ParamField>
+
+<ParamField path="data" type="object">
+  Data to include in the event detail
+</ParamField>
+
+<ParamField path="duration" type="number">
+  Countdown duration in milliseconds
+</ParamField>
+
+### Advanced undo toast
+
+```js
+toast.undo({
+  title: 'Item archived',
+  event: 'confirm-archive',
+  undoEvent: 'undo-archive',
+  data: { id: 456 },
+  duration: 8000,
+  type: 'info',
+});
+```
+
+<ParamField path="title" type="string" required>
+  The toast title text
+</ParamField>
+
+<ParamField path="event" type="string" required>
+  Event name to dispatch when countdown expires (if not undone)
+</ParamField>
+
+<ParamField path="undoEvent" type="string">
+  Event name to dispatch when user clicks undo button
+</ParamField>
+
+<ParamField path="data" type="object">
+  Data to include in the event detail
+</ParamField>
+
+<ParamField path="duration" type="number" default="5000">
+  Countdown duration in milliseconds
+</ParamField>
+
+<ParamField path="type" type="string" default="warning">
+  Toast type: `success`, `error`, `warning`, `info`, `loading`
+</ParamField>
+
+<ParamField path="icon" type="string">
+  Override the default type icon
+</ParamField>
+
+<ParamField path="color" type="string">
+  Custom color to override the type color
+</ParamField>
+
+<ParamField path="id" type="string | number">
+  Optional unique identifier for the toast
+</ParamField>
+
+### Examples
+
+<CodeGroup>
+```js Delete with undo
+toast.undo('Message deleted', 'confirm-delete', { id: 123 });
+
+window.addEventListener('confirm-delete', (e) => {
+  fetch(`/api/messages/${e.detail.id}`, { method: 'DELETE' });
+});
+```
+
+```js Archive with undo and undo events
+toast.undo({
+  title: 'Item archived',
+  event: 'confirm-archive',
+  undoEvent: 'undo-archive',
+  data: { id: 456 },
+  duration: 8000,
+  type: 'info',
+});
+
+window.addEventListener('confirm-archive', (e) => {
+  // Confirm archive action
+});
+
+window.addEventListener('undo-archive', (e) => {
+  // Handle undo
+});
+```
+</CodeGroup>
+
+## toast.promise()
+
+Show a loading toast that automatically resolves to success or error based on a promise.
+
+```js
+toast.promise(fetch('/api/save'), {
+  loading: 'Saving...',
+  success: 'Saved!',
+  error: 'Failed to save',
+});
+```
+
+<ParamField path="promise" type="Promise" required>
+  A promise to monitor. Must be a thenable object with a `.then()` method
+</ParamField>
+
+<ParamField path="messages" type="object" required>
+  Messages for each state of the promise
+  
+  ```js
+  {
+    loading: 'Saving...',
+    success: 'Saved!',
+    error: 'Failed to save'
+  }
+  ```
+</ParamField>
+
+Returns the original promise, allowing you to chain `.then()` or `.catch()` calls.
+
+### Examples
+
+<CodeGroup>
+```js Basic promise
+toast.promise(fetch('/api/save'), {
+  loading: 'Saving...',
+  success: 'Saved!',
+  error: 'Failed to save',
+});
+```
+
+```js With chaining
+toast.promise(fetch('/api/save'), {
+  loading: 'Saving...',
+  success: 'Saved!',
+  error: 'Failed to save',
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+## toast.update()
+
+Update an existing toast by ID.
+
+```js
+toast.update('my-toast', { title: 'New title', type: 'success' });
+```
+
+<ParamField path="id" type="string | number" required>
+  The ID of the toast to update
+</ParamField>
+
+<ParamField path="options" type="object" required>
+  Options to update. Supports all standard toast options:
+  - `type`
+  - `title`
+  - `message`
+  - `icon`
+  - `avatar`
+  - `avatarSize`
+  - `color`
+  - `progress`
+  - `persistent`
+  - `duration`
+</ParamField>
+
+### Examples
+
+<CodeGroup>
+```js Update title and type
+const id = toast({ type: 'loading', title: 'Processing...' });
+
+setTimeout(() => {
+  toast.update(id, {
+    type: 'success',
+    title: 'Complete!'
+  });
+}, 2000);
+```
+
+```js Update progress
+const id = toast({
+  id: 'upload',
+  type: 'info',
+  title: 'Uploading...',
+  progress: 0
+});
+
+toast.update('upload', { progress: 0.5 });
+toast.update('upload', { progress: 1, type: 'success', title: 'Uploaded!' });
+```
+</CodeGroup>
+
+## toast.theme()
+
+Switch between dark and light themes at runtime.
+
+```js
+toast.theme('light');
+toast.theme('dark');
+```
+
+<ParamField path="theme" type="string" required>
+  Theme name: `dark` or `light`
+</ParamField>
+
+### Example
+
+```js
+// Switch to light theme
+toast.theme('light');
+
+// Switch to dark theme
+toast.theme('dark');
+```
+
+## toast.registerIcon()
+
+Register a custom icon that can be used in toasts.
+
+```js
+toast.registerIcon('star', '<svg viewBox="0 0 24 24">...</svg>');
+
+toast({ type: 'success', title: 'Favorited!', icon: 'star' });
+```
+
+<ParamField path="name" type="string" required>
+  Icon name to register
+</ParamField>
+
+<ParamField path="svg" type="string" required>
+  SVG markup for the icon
+</ParamField>
+
+### Example
+
+```js
+// Register a custom star icon
+toast.registerIcon('star', `
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+`);
+
+// Use in toasts
+toast({ type: 'success', title: 'Favorited!', icon: 'star' });
+```

@@ -1,0 +1,369 @@
+---
+title: Publishing views
+description: Customize the component markup by publishing and editing the Blade view files
+---
+
+If you need complete control over the toast component's HTML structure, styles, or Alpine.js behavior, you can publish the Blade views to your application and modify them directly.
+
+## Why publish views?
+
+Publishing views allows you to:
+
+- Customize the HTML structure of toasts
+- Modify the Alpine.js component behavior
+- Add custom CSS styles or animations
+- Change the visual design beyond config options
+- Integrate with your own design system
+
+<Warning>
+Published views give you full control, but you'll need to manually merge updates when upgrading the package. Only publish views if you need customization beyond what the [configuration options](/core/configuration) provide.
+</Warning>
+
+## Publishing the views
+
+Use the Artisan command to publish the Blade view files to your application:
+
+```bash
+php artisan vendor:publish --tag=gooey-toast-views
+```
+
+This copies the view files to your `resources/views/vendor/gooey-toast/` directory.
+
+## View structure
+
+After publishing, you'll find these files:
+
+```bash
+resources/views/vendor/gooey-toast/
+├── components/
+│   └── container.blade.php    # Main toast container component
+├── partials/
+│   ├── scripts.blade.php      # Alpine.js logic and JavaScript
+│   └── styles.blade.php       # CSS styles and animations
+```
+
+### container.blade.php
+
+The main component that renders the toast container and individual toasts. This file contains:
+
+- The outer container with positioning
+- Alpine.js data binding
+- Toast rendering loop
+- Expandable body sections
+- Action buttons and undo controls
+
+### scripts.blade.php
+
+Contains all the JavaScript functionality:
+
+- Alpine.js component definition
+- Toast management methods (`add`, `update`, `dismiss`)
+- Timer and animation logic
+- Event listeners for Livewire integration
+- Global `toast()` helper functions
+
+### styles.blade.php
+
+Defines the visual appearance:
+
+- CSS for toast layout and styling
+- Animation keyframes
+- Theme variables (dark/light)
+- Responsive design rules
+- Gooey blob SVG filters
+
+## Common customizations
+
+### Changing the gooey animation
+
+The signature "gooey" effect comes from an SVG filter. To adjust the blob animation intensity:
+
+<Steps>
+
+<Step title="Open styles.blade.php">
+Find the SVG filter definition:
+
+```blade
+<svg style="position: absolute; width: 0; height: 0;">
+    <defs>
+        <filter id="gooey-toast-goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+            <feColorMatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
+        </filter>
+    </defs>
+</svg>
+```
+</Step>
+
+<Step title="Adjust stdDeviation">
+Increase for a more exaggerated gooey effect (default: 8):
+
+```blade
+<feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+```
+</Step>
+
+<Step title="Modify color matrix">
+The last two values (`20 -8`) control the blob intensity. Increase the first number for stronger effect:
+
+```blade
+<feColorMatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo" />
+```
+</Step>
+
+</Steps>
+
+### Customizing entrance animations
+
+Modify how toasts appear on screen by editing the animation keyframes:
+
+```css
+/* In styles.blade.php */
+
+/* Smooth slide-up (success, info, loading) */
+@keyframes gooey-toast-enter {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Shake animation for errors */
+@keyframes gooey-toast-enter-error {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    60% { transform: translateX(-8px); }
+    70% { transform: translateX(8px); }
+    80% { transform: translateX(-4px); }
+    90% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+```
+
+<Note>
+You can create entirely new animation types by defining custom keyframes and updating the `enterAnimations` object in `scripts.blade.php`.
+</Note>
+
+### Adding custom toast positions
+
+The default positions are `bottom-center`, `bottom-right`, `top-center`, and `top-right`. To add more:
+
+<Steps>
+
+<Step title="Update the Alpine.js component">
+In `scripts.blade.php`, modify the positioning logic in the `init()` method or add new CSS classes.
+</Step>
+
+<Step title="Add CSS positioning">
+In `styles.blade.php`, define styles for your new position:
+
+```css
+.gooey-toast-container[data-position="bottom-left"] {
+    bottom: 0;
+    left: 0;
+    margin: 1rem;
+    align-items: flex-start;
+}
+```
+</Step>
+
+<Step title="Update configuration">
+Add the new position to your `config/gooey-toast.php`:
+
+```php
+'position' => 'bottom-left',
+```
+</Step>
+
+</Steps>
+
+### Changing color scheme
+
+Customize the type colors by editing the `typeColors` object:
+
+```js
+// In scripts.blade.php
+typeColors: {
+    success: '#22c55e',  // Change to your brand green
+    error: '#ef4444',    // Change to your brand red
+    warning: '#f59e0b',  // Change to your brand amber
+    info: '#3b82f6',     // Change to your brand blue
+    loading: '#888',
+    notification: '#ffffff',
+}
+```
+
+### Modifying the layout
+
+Edit `container.blade.php` to change the toast structure:
+
+```blade
+<!-- Example: Add a custom header to all toasts -->
+<div class="toast-header" style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <span style="font-size: 10px; text-transform: uppercase; opacity: 0.7;">
+        {{ config('app.name') }}
+    </span>
+</div>
+
+<!-- Existing toast content -->
+<div class="toast-content">
+    ...
+</div>
+```
+
+## Integrating with your design system
+
+If you're using a specific design system or component library, you can adapt the toast markup:
+
+### Tailwind CSS example
+
+Replace inline styles with Tailwind classes:
+
+```blade
+<!-- Before -->
+<div style="padding: 12px 16px; border-radius: 8px;">
+
+<!-- After -->
+<div class="p-3 rounded-lg">
+```
+
+### Bootstrap example
+
+Use Bootstrap utility classes:
+
+```blade
+<div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+        <strong class="me-auto" x-text="toast.title"></strong>
+        <button type="button" class="btn-close" @click="dismiss(toast, true)"></button>
+    </div>
+    <div class="toast-body" x-show="toast.expanded">
+        <!-- Body content -->
+    </div>
+</div>
+```
+
+## Restoring default views
+
+If you want to revert to the package's default views:
+
+<Steps>
+
+<Step title="Delete published views">
+Remove the entire directory:
+
+```bash
+rm -rf resources/views/vendor/gooey-toast
+```
+</Step>
+
+<Step title="Clear view cache">
+Clear Laravel's compiled views:
+
+```bash
+php artisan view:clear
+```
+</Step>
+
+<Step title="Test the changes">
+Reload your application to verify the default views are being used.
+</Step>
+
+</Steps>
+
+## Upgrade considerations
+
+When you upgrade the Gooey Toast package:
+
+<Warning>
+**Your published views won't automatically update.** You'll need to manually merge changes from the package's updated views.
+</Warning>
+
+To see what changed:
+
+<Steps>
+
+<Step title="Backup your customizations">
+Copy your modified views to a safe location:
+
+```bash
+cp -r resources/views/vendor/gooey-toast ~/gooey-toast-backup
+```
+</Step>
+
+<Step title="Republish views">
+Force republish to get the latest versions:
+
+```bash
+php artisan vendor:publish --tag=gooey-toast-views --force
+```
+</Step>
+
+<Step title="Compare and merge">
+Use a diff tool to compare your backup with the new files and merge your customizations:
+
+```bash
+diff -ur ~/gooey-toast-backup resources/views/vendor/gooey-toast
+```
+</Step>
+
+</Steps>
+
+## Best practices
+
+<CardGroup cols={2}>
+
+<Card title="Document your changes" icon="file-lines">
+Keep a changelog of customizations you make so you can reapply them after upgrades.
+</Card>
+
+<Card title="Minimize modifications" icon="minimize">
+Only change what's necessary. The less you modify, the easier upgrades become.
+</Card>
+
+<Card title="Test thoroughly" icon="vial">
+Test your customizations in both light and dark themes, on mobile and desktop.
+</Card>
+
+<Card title="Version control" icon="code-branch">
+Commit your published views to git so you can track changes over time.
+</Card>
+
+</CardGroup>
+
+## Alternative: CSS-only customization
+
+Before publishing views, consider if you can achieve your goals with custom CSS:
+
+```blade
+<!-- In your layout -->
+<x-gooey-toast />
+
+<style>
+    /* Override specific toast styles */
+    [x-data*="gooeyToast"] {
+        /* Your custom styles */
+    }
+    
+    /* Change toast background */
+    .gooey-toast-item {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+</style>
+```
+
+This approach lets you customize appearance without publishing views, making upgrades simpler.
+
+<Note>
+CSS customization is recommended for styling changes. Only publish views when you need to modify the HTML structure or JavaScript behavior.
+</Note>

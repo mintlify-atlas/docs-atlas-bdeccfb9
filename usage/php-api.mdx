@@ -1,0 +1,455 @@
+---
+title: PHP API
+description: Trigger toasts from PHP code using the GooeyToast facade
+---
+
+The PHP API lets you trigger toasts directly from controllers, jobs, or any PHP code. Works with any Laravel project — no Livewire required.
+
+## Quick start
+
+Import the facade:
+
+```php
+use A89s\GooeyToast\Facades\GooeyToast;
+```
+
+Show a toast:
+
+```php
+GooeyToast::success('Saved!');
+```
+
+## Quick methods
+
+Four convenience methods for common toast types:
+
+<CodeGroup>
+```php Success
+GooeyToast::success('Saved!');
+GooeyToast::success('User created', 'John Doe has been added to the team.');
+```
+
+```php Error
+GooeyToast::error('Something went wrong');
+GooeyToast::error('Upload failed', 'File size exceeds 10 MB.');
+```
+
+```php Warning
+GooeyToast::warning('Warning message');
+GooeyToast::warning('Disk space low', 'Only 2 GB remaining.');
+```
+
+```php Info
+GooeyToast::info('Information');
+GooeyToast::info('New feature available', 'Try our new export tool.');
+```
+</CodeGroup>
+
+<Note>
+The second parameter adds an optional message text block below the title.
+</Note>
+
+## Fluent builder
+
+For full control, use the fluent builder API:
+
+```php
+GooeyToast::make('Title', 'success')
+    ->message('Additional message')
+    ->send();
+```
+
+### With avatar
+
+```php
+GooeyToast::make('New message', 'info')
+    ->avatar('/avatars/user.jpg')
+    ->avatarSize('32px')
+    ->send();
+```
+
+### Full configuration
+
+```php
+GooeyToast::make('Deployment complete', 'success')
+    ->details([
+        ['label' => 'Environment', 'value' => 'Production'],
+        ['label' => 'Branch', 'value' => 'main'],
+    ])
+    ->footer('https://deploy.example.com/logs/123')
+    ->duration(5000)
+    ->send();
+```
+
+## Message text
+
+Display plain text instead of structured details:
+
+```php
+GooeyToast::make('Melissa', 'info')
+    ->avatar('/avatars/melissa.jpg')
+    ->message('Please visit HR when you get a chance 👋')
+    ->footer('1h ago')
+    ->send();
+```
+
+## Details
+
+Add expandable key-value rows:
+
+```php
+GooeyToast::make('Server error', 'error')
+    ->details([
+        ['label' => 'Status', 'value' => '500'],
+        ['label' => 'Endpoint', 'value' => '/api/users'],
+    ])
+    ->send();
+```
+
+Or build details one row at a time:
+
+```php
+GooeyToast::make('Report generated', 'success')
+    ->detail('File', 'monthly-report.pdf')
+    ->detail('Size', '2.3 MB')
+    ->detail('Pages', '47')
+    ->send();
+```
+
+## Action buttons
+
+Add clickable buttons that dispatch JavaScript events:
+
+```php
+GooeyToast::make('Message sent', 'success')
+    ->action('View', 'view-message', 'external-link')
+    ->send();
+```
+
+With custom color and confirmation:
+
+```php
+GooeyToast::make('Delete account', 'warning')
+    ->action('Delete', 'delete-account', 'trash', '#ef4444', confirm: true)
+    ->send();
+```
+
+### Multiple actions
+
+```php
+GooeyToast::make('Incoming call', 'info')
+    ->persistent()
+    ->actions([
+        ['label' => 'Accept', 'icon' => 'check', 'event' => 'accept', 'color' => '#22c55e'],
+        ['label' => 'Decline', 'icon' => 'x', 'event' => 'decline', 'color' => '#ef4444'],
+    ])
+    ->send();
+```
+
+## Persistent toasts
+
+Prevent auto-dismissal:
+
+```php
+GooeyToast::make('Connection lost', 'error')
+    ->persistent()
+    ->send();
+```
+
+Persistent toasts only close via the close button, an action button, or swipe gesture.
+
+## Custom colors
+
+Override the type color:
+
+```php
+GooeyToast::make('VIP Access Granted', 'success')
+    ->color('#8b5cf6')
+    ->send();
+```
+
+## Duration
+
+Set a custom auto-dismiss duration (in milliseconds):
+
+```php
+GooeyToast::make('Quick message', 'info')
+    ->duration(2000)
+    ->send();
+```
+
+## Vibration
+
+Trigger device vibration (mobile only):
+
+```php
+GooeyToast::make('Incoming call', 'info')
+    ->vibrate([200, 100, 200])
+    ->send();
+```
+
+## Toast IDs
+
+Assign a custom ID for later updates:
+
+```php
+GooeyToast::make('Processing...', 'loading')
+    ->id('task-123')
+    ->send();
+```
+
+You can update this toast from JavaScript:
+
+```js
+toast.update('task-123', { title: 'Complete!', type: 'success' });
+```
+
+## Builder methods
+
+<ParamField path="title" type="string">
+  Set the toast title.
+  
+  ```php
+  ->title('New title')
+  ```
+</ParamField>
+
+<ParamField path="type" type="string">
+  Set the toast type: `success`, `error`, `warning`, `info`, `loading`.
+  
+  ```php
+  ->type('error')
+  ```
+</ParamField>
+
+<ParamField path="message" type="string">
+  Set plain text message block.
+  
+  ```php
+  ->message('Additional details here')
+  ```
+</ParamField>
+
+<ParamField path="details" type="array">
+  Set expandable detail rows.
+  
+  ```php
+  ->details([
+      ['label' => 'Key', 'value' => 'Value'],
+  ])
+  ```
+</ParamField>
+
+<ParamField path="detail" type="string, string">
+  Add a single detail row.
+  
+  ```php
+  ->detail('Label', 'Value')
+  ```
+</ParamField>
+
+<ParamField path="footer" type="string">
+  Set footer text.
+  
+  ```php
+  ->footer('Additional info')
+  ```
+</ParamField>
+
+<ParamField path="actions" type="array">
+  Set action buttons.
+  
+  ```php
+  ->actions([
+      ['label' => 'Click', 'icon' => 'check', 'event' => 'my-event'],
+  ])
+  ```
+</ParamField>
+
+<ParamField path="action" type="string, string, ?string, ?string, bool">
+  Add a single action button.
+  
+  ```php
+  ->action('Label', 'event-name', 'icon', '#22c55e', confirm: true)
+  ```
+  
+  Parameters: `label`, `event`, `icon` (optional), `color` (optional), `confirm` (optional)
+</ParamField>
+
+<ParamField path="vibrate" type="array|bool">
+  Enable vibration on mobile.
+  
+  ```php
+  ->vibrate(true)
+  ->vibrate([200, 100, 200])
+  ```
+</ParamField>
+
+<ParamField path="duration" type="int">
+  Set auto-dismiss duration in milliseconds.
+  
+  ```php
+  ->duration(5000)
+  ```
+</ParamField>
+
+<ParamField path="persistent" type="">
+  Make toast persistent (never auto-dismiss).
+  
+  ```php
+  ->persistent()
+  ```
+</ParamField>
+
+<ParamField path="color" type="string">
+  Set custom color (hex or CSS color).
+  
+  ```php
+  ->color('#8b5cf6')
+  ```
+</ParamField>
+
+<ParamField path="avatar" type="string">
+  Set avatar image URL.
+  
+  ```php
+  ->avatar('/avatars/user.jpg')
+  ```
+</ParamField>
+
+<ParamField path="avatarSize" type="string">
+  Set avatar size (CSS unit).
+  
+  ```php
+  ->avatarSize('32px')
+  ```
+</ParamField>
+
+<ParamField path="id" type="string">
+  Set toast ID for later updates.
+  
+  ```php
+  ->id('my-toast-id')
+  ```
+</ParamField>
+
+<ParamField path="send" type="">
+  Send the toast (stores in session for next page load).
+  
+  ```php
+  ->send()
+  ```
+</ParamField>
+
+## Complete examples
+
+<CodeGroup>
+```php Controller
+<?php
+
+namespace App\Http\Controllers;
+
+use A89s\GooeyToast\Facades\GooeyToast;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+        ]);
+        
+        $user = User::create($validated);
+        
+        GooeyToast::make('User created', 'success')
+            ->message("Welcome {$user->name}!")
+            ->detail('Email', $user->email)
+            ->detail('ID', $user->id)
+            ->send();
+        
+        return redirect()->route('users.index');
+    }
+    
+    public function destroy($id)
+    {
+        User::findOrFail($id)->delete();
+        
+        GooeyToast::success('User deleted');
+        
+        return back();
+    }
+}
+```
+
+```php Job
+<?php
+
+namespace App\Jobs;
+
+use A89s\GooeyToast\Facades\GooeyToast;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+
+class ProcessReport implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable;
+    
+    public function handle()
+    {
+        // Process report...
+        
+        GooeyToast::make('Report ready', 'success')
+            ->avatar('/icons/reports.svg')
+            ->message('Your monthly report has been generated.')
+            ->action('Download', 'download-report', 'download', '#3b82f6')
+            ->send();
+    }
+}
+```
+
+```php Command
+<?php
+
+namespace App\Console\Commands;
+
+use A89s\GooeyToast\Facades\GooeyToast;
+use Illuminate\Console\Command;
+
+class SyncData extends Command
+{
+    protected $signature = 'data:sync';
+    
+    public function handle()
+    {
+        $this->info('Syncing data...');
+        
+        try {
+            // Sync logic...
+            
+            GooeyToast::success('Data synced', 'All records are up to date.');
+            
+            return 0;
+        } catch (\Exception $e) {
+            GooeyToast::make('Sync failed', 'error')
+                ->message($e->getMessage())
+                ->persistent()
+                ->send();
+            
+            return 1;
+        }
+    }
+}
+```
+</CodeGroup>
+
+## How it works
+
+The PHP API stores toasts in the session. When the next page loads, the Blade component (`<x-gooey-toast />`) automatically displays and clears them.
+
+<Note>
+Toasts triggered via the PHP API only appear on the **next** page load (after a redirect). For immediate toasts without a page refresh, use the [JavaScript API](/usage/javascript-api) or [Livewire integration](/usage/livewire).
+</Note>
